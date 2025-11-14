@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - "5173:5173"           # React dev server port
+    env_file:
+      - ./frontend/.env
+    volumes:
+      - ./frontend:/app       # hot reload
+    command: npm run dev      # ensure dev server runs
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - "8000:8000"           # Node/Express dev port
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app        # hot reload
+    depends_on:
+      - postgres
+      - redis
+    command: nodemon --watch . --ext ts,json --exec ts-node src/server.ts
+    # or whatever starts your backend dev server
+
+  postgres:
+    image: postgres:alpine
+    container_name: pgdata
+    restart: always
+    ports:
+      - "5433:5432"            # host:container
+    environment:
+      POSTGRES_USER: postgres_user     # Replace with your username
+      POSTGRES_PASSWORD: postgres_pass # Replace with your password
+      POSTGRES_DB: library_db          # Replace with your DB name
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6380:6379"           # host:container
+    command: redis-server --appendonly yes
+
+volumes:
+  pgdata:

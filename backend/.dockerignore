@@ -1,0 +1,40 @@
+# Node modules
+node_modules
+**/node_modules
+
+# Compiled output (for TypeScript)
+dist
+build
+
+# Logs
+*.log
+logs
+
+# Environment files
+.env
+.env.*
+
+# IDE/editor configs
+.vscode
+.idea
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Docker and Compose files (only if you don’t need them inside the image)
+docker-compose.yml
+docker-compose.*.yml
+.dockerignore
+Dockerfile*
+
+# Misc
+*.bak
+*.old
+*.lock

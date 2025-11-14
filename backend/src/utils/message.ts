@@ -1,0 +1,132 @@
+const messages = {
+  successMessages: {
+    sudoAdmin: {
+      create: "Super Admin: Created successfully.",
+      update: "Super Admin: Updated successfully.",
+      delete: "Super Admin: Deleted successfully.",
+      activate: "Super Admin: Activated successfully.",
+      deactivate: "Super Admin: Deactivated successfully.",
+    },
+    libraryAdmin: {
+      create: "Library Admin: Created successfully.",
+      update: "Library Admin: Updated successfully.",
+      delete: "Library Admin: Deleted successfully.",
+      activate: "Library Admin: Activated successfully.",
+      deactivate: "Library Admin: Deactivated successfully.",
+    },
+    employee: {
+      create: "Employee: Created successfully.",
+      update: "Employee: Updated successfully.",
+      delete: "Employee: Deleted successfully.",
+      activate: "Employee: Activated successfully.",
+      deactivate: "Employee: Deactivated successfully.",
+      alreadyexist: "Employee already exist",
+    },
+    user: {
+      create: "User: Created successfully.",
+      update: "User: Updated successfully.",
+      delete: "User: Deleted successfully.",
+      activate: "User: Activated successfully.",
+      deactivate: "User: Deactivated successfully.",
+    },
+    book: {
+      create: "Book: Created successfully.",
+      update: "Book: Updated successfully.",
+      delete: "Book: Deleted successfully.",
+      borrow: "Book: Borrowed successfully.",
+      return: "Book: Returned successfully.",
+    },
+    borrowRequest: {
+      create: "Borrow Request: Created successfully.",
+      update: "Borrow Request: Updated successfully.",
+      delete: "Borrow Request: Deleted successfully.",
+      approve: "Borrow Request: Approved successfully.",
+      reject: "Borrow Request: Rejected successfully.",
+    },
+    genre: {
+      create: "Genre: Created successfully.",
+      update: "Genre: Updated successfully.",
+      delete: "Genre: Deleted successfully.",
+    },
+    category: {
+      create: "Category: Created successfully.",
+      update: "Category: Updated successfully.",
+      delete: "Category: Deleted successfully.",
+    },
+    authentication: {
+      login: "Login successful.",
+      logout: "Logout successful.",
+      register: "Registration successful.",
+      sessionActive: "Session is active.",
+      sessionExpired: "Session expired. Please log in again.",
+    },
+    token: {
+      refresh: "Access token refreshed successfully.",
+      revoked: "Token revoked successfully.",
+    },
+    password: {
+      resetRequest: "Password reset request successful. Check your email.",
+      resetSuccess: "Password reset successfully.",
+      changeSuccess: "Password changed successfully.",
+      incorrect: "Incorrect password. Please try again.",
+    },
+    emailVerification: {
+      sent: "Verification email sent successfully.",
+      verified: "Email verified successfully.",
+      alreadyVerified: "Email is already verified.",
+    },
+    profile: {
+      update: "Profile updated successfully.",
+      pictureUpload: "Profile picture uploaded successfully.",
+      pictureDelete: "Profile picture deleted successfully.",
+    },
+    settings: {
+      update: "Settings updated successfully.",
+    },
+    notifications: {
+      sent: "Notification sent successfully.",
+      read: "Notification marked as read.",
+      deleted: "Notification deleted successfully.",
+    },
+  },
+  errorMessages: {
+    book: {
+      notAvailable: "Book is not available.",
+    },
+    borrow: {
+      alreadyBorrowed: "Book is already borrowed.",
+      alreadyReturned: "Book is already returned.",
+    },
+    emailExist: "Email already exists. Please choose a different email.",
+    phoneNumberExist:
+      "Phone number already exists. Please choose a different phone number.",
+    passwordIncorrect: "Incorrect password. Please try again.",
+    universityIdExist:
+      "University ID already exists. Please choose a different ID.",
+    emailNotFound: "Email not found. Please check your email address.",
+    emailVerified: "Email is already verified. Please log in.",
+    emailNotVerified: "Email is not verified. Please verify your email.",
+    emailVerificationExpired: "Email verification link has expired.",
+    validationError: "Invalid input. Please check your data.",
+    unauthorized: "Unauthorized. Please log in.",
+    forbidden: "Access denied. You do not have permission.",
+    notFound: "Record not found.",
+    alreadyExists: "This record already exists.",
+    noUserFound: "No user found with the provided details.",
+    conflict: "Conflict detected. Already exists.",
+    serverError: "Internal server error. Please try again later.",
+    badRequest: "Bad request. Check your input and try again.",
+    tokenExpired: "Session expired. Please log in again.",
+    tooManyRequests: "Too many requests. Please try again later.",
+    databaseError: "Database error occurred.",
+    networkError: "Network error. Please check your connection.",
+    uploadError: "File upload failed. Please try again.",
+    authenticationFailed: "Invalid email or password.",
+    accountLocked: "Account is locked due to multiple failed attempts.",
+    accountBlocked: "Account is blocked. Please contact support.",
+    actionNotAllowed: "This action is not allowed.",
+    dependencyError: "Operation failed due to dependent records.",
+  },
+};
+
+export default messages;

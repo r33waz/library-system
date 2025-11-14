@@ -1,0 +1,21 @@
+# Use Node 23 Alpine for dev
+FROM node:23-alpine AS development
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install
+RUN npm install -g nodemon ts-node typescript
+
+# Copy backend source code
+COPY . .
+
+# Expose backend port
+EXPOSE 8000
+
+# Start the backend using nodemon + ts-node
+CMD ["nodemon", "--watch", ".", "--ext", "ts,json", "--exec", "ts-node", "src/server.ts"]
