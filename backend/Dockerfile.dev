@@ -14,7 +14,7 @@ RUN npm install -g nodemon ts-node typescript
 # Copy backend source code
 COPY . .
 
-# Expose backend port
+# Expose backend port for testing
 EXPOSE 8000
 
 # Start the backend using nodemon + ts-node
