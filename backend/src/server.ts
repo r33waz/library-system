@@ -1,5 +1,3 @@
-import "reflect-metadata";
-
 import cluster from "cluster";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -8,15 +6,20 @@ import express from "express";
 import helmet from "helmet";
 import os from "os";
 import path from "path";
+import "reflect-metadata";
 import AppDataSource from "./config/db.config";
 import { csrfProtection, setCsrfCookie } from "./middleware/crsf.middleware";
 import mainRouter from "./routes/mainRoute";
 import "./utils/crons/overdueCheck.cron";
 import redisClient from "./utils/redisClient";
 
-if (cluster.isPrimary) {
-  console.log(`Primary ${process.pid} is running`);
+// enable clustering ONLY in production
+const isProd = process.env.NODE_ENV === "production";
 
+if (isProd && cluster.isPrimary) {
+  console.log(`Primary ${process.pid} running in PRODUCTION with clustering`);
+
+  // one worker per CPU in prod
   os.cpus().forEach(() => cluster.fork());
 
   cluster.on("exit", (worker) => {
@@ -27,6 +30,7 @@ if (cluster.isPrimary) {
   const startServer = async () => {
     try {
       await redisClient.connect();
+      await AppDataSource.initialize();
 
       const app = express();
 
@@ -43,7 +47,6 @@ if (cluster.isPrimary) {
 
       app.use(express.json());
       app.use(express.urlencoded({ extended: true }));
-
       app.use(express.static(path.join(__dirname, "./image/uploads")));
 
       app.use(
@@ -56,11 +59,11 @@ if (cluster.isPrimary) {
 
       app.use(mainRouter);
 
-      await AppDataSource.initialize();
-
       const port = process.env.PORT || 8080;
       app.listen(port, () =>
-        console.log(`Worker ${process.pid} listening on port ${port}`)
+        console.log(
+          `Worker ${process.pid} running in ${isProd ? "PROD" : "DEV"} on port ${port}`
+        )
       );
     } catch (error) {
       console.error("Startup failed:", error);
