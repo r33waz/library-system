@@ -1,9 +1,8 @@
 import firebaseAdmin from "firebase-admin";
-
-const serviceAccount = JSON.parse(process.env.FIREBASE_ADMIN_JSON!);
+import serviceAccount from "../constant/librarymanagement.json"; // tsconfig.json must allow "resolveJsonModule": true
 
 firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
+  credential: firebaseAdmin.credential.cert(serviceAccount as firebaseAdmin.ServiceAccount),
 });
 
 export default firebaseAdmin;

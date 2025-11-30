@@ -1,0 +1,36 @@
+# port 
+PORT=8000
+
+
+# jwt secret
+ACCESS_TOKEN_SECRET=Acc3SS_T@k3n_S3cr3t
+REFRESH_TOKEN_SECRET=R3fr3sh_T@k3n_S3cr3t
+
+
+#database configuration
+DB_PORT=,
+DB_USER=
+DB_PASSWORD=,
+DB_NAME=,
+DB_HOST=,
+
+#redis configuration
+REDIS_HOST=fleet-squirrel-9224.upstash.io
+REDIS_RPASSWORD=ASQIAAImcDI5ZDAyODU4ZDA0OGI0ZDg3YWY0ODE1NTU0MzRkMjY1ZHAyOTIyNA
+
+# fire base 
+FIREBASE_ADMIN_JSON = ../constant/librarymanagement.json
+
+
+
+
+# backend Url
+VITE_BACKEND_URL=http://localhost:8000/
+
+VITE_FIREBASE_API_KEY=AIzaSyCwGlm4iiKnpC0ZYdCqcywRyIbnYxauBwA
+VITE_FIREBASE_AUTH_DOMAIN=librarymanagement-98450.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=librarymanagement-98450
+VITE_FIREBASE_STORAGE_BUCKET=librarymanagement-98450.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=580814180533
+VITE_FIREBASE_APP_ID=1:580814180533:web:69eb0160f63667d69a2efc
+VITE_FIREBASE_MEASUREMENT_ID=G-QE9Z9CN4V3
