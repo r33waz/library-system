@@ -54,10 +54,10 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <Navigate to="/e-book/home" replace />;
   }
 
-  if (path.startsWith("/e-book") && user?.role !== "" && user?.role !== undefined) {
-    // Only normal users can access /e-book
-    return <Navigate to="/library/dashboard" replace />; // redirect library users or admin away
-  }
+  // if (path.startsWith("/e-book") && user?.role !== "" && user?.role !== undefined) {
+  //   // Only normal users can access /e-book
+  //   return <Navigate to="/library/dashboard" replace />; // redirect library users or admin away
+  // }
 
 
   return <>{children}</>;

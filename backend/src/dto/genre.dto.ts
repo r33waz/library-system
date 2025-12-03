@@ -1,18 +1,21 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IMedia } from "../interface/media.interface";
 
 class GenreDto {
-    @IsNotEmpty()
-    @IsString()
-    name:string
+  @IsNotEmpty()
+  @IsString()
+  name: string;
 
-    @IsNotEmpty()
-    media: IMedia
+  @IsNotEmpty()
+  media: IMedia;
 }
 
 class UpdateGenreDto {
-    @IsNotEmpty()
-    @IsString()
-    name:string
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  media?: IMedia;
 }
 export { GenreDto, UpdateGenreDto };

@@ -3,20 +3,20 @@ import { AuthenticatedRequest } from "../interface/auth.Interface";
 import authService from "../service/auth.service";
 import { sendResponse } from "../utils/responseHandler";
 
-const AuthController = {
+class AuthController {
   // // Login handler
-  login: async (req: Request, res: Response): Promise<void> => {
-    const result = await authService.loginService(req.body, res);
+  async login(req: Request, res: Response): Promise<void> {
+    const result = await authService.login(req.body, res);
     sendResponse(res, {
       status: result?.status,
       message: result?.message,
       httpCode: result?.code,
       data: result?.data,
     });
-  },
+  }
 
-  googleLogin: async (req: Request, res: Response): Promise<void> => {
-    console.log("🚀 ~ req:", req)
+  async googleLogin(req: Request, res: Response): Promise<void> {
+    console.log("🚀 ~ req:", req);
     const result = await authService.googleLoginService(req, res);
     sendResponse(res, {
       status: result?.status,
@@ -24,53 +24,53 @@ const AuthController = {
       httpCode: result?.code,
       data: result?.data,
     });
-  },
+  }
 
   // Signup handler
-  signup: async (req: Request, res: Response): Promise<void> => {
+  async signup(req: Request, res: Response): Promise<void> {
     const result = await authService.signUpService(req);
     sendResponse(res, {
       status: result?.status,
       httpCode: result?.code,
       message: result?.message,
     });
-  },
+  }
 
   // Forgot Password handler
-  forgotPassword: async (req: Request, res: Response): Promise<void> => {
-    const { email } = req.body;
-    res.send(`Forgot Password logic here for email: ${email}`);
-  },
+  // forgotPassword: async (req: Request, res: Response): Promise<void> => {
+  //   const { email } = req.body;
+  //   res.send(`Forgot Password logic here for email: ${email}`);
+  // },
 
   // Reset Password handler
-  resetPassword: async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
-    res.send(`Reset Password logic here for email: ${email}`);
-  },
+  // resetPassword: async (req: Request, res: Response): Promise<void> => {
+  //   const { email, password } = req.body;
+  //   res.send(`Reset Password logic here for email: ${email}`);
+  // },
 
   // Change Password handler
-  changePassword: async (req: Request, res: Response): Promise<void> => {
-    const { email, password } = req.body;
-    res.send(`Change Password logic here for email: ${email}`);
-  },
+  // changePassword: async (req: Request, res: Response): Promise<void> => {
+  //   const { email, password } = req.body;
+  //   res.send(`Change Password logic here for email: ${email}`);
+  // },
 
   // Logout handler
-  logout: async (req: Request, res: Response): Promise<void> => {
+  async logout(req: Request, res: Response): Promise<void> {
     const result = await authService.logoutService(res);
     res.status(result?.status || 200).json({
       status: result?.status,
       message: result?.message,
     });
-  },
+  }
 
   // Refresh Token handler
-  refreshToken: async (req: Request, res: Response): Promise<void> => {
-    const { email } = req.body;
-    res.send(`Refresh Token logic here for email: ${email}`);
-  },
+  // refreshToken: async (req: Request, res: Response): Promise<void> => {
+  //   const { email } = req.body;
+  //   res.send(`Refresh Token logic here for email: ${email}`);
+  // },
 
   // authorized user
-  authorizedUser: async (req: Request, res: Response): Promise<void> => {
+  async authorizedUser(req: Request, res: Response): Promise<void> {
     const result = await authService.authorizeUser(
       req as AuthenticatedRequest,
       res
@@ -80,24 +80,24 @@ const AuthController = {
       data: result?.data,
       httpCode: result?.code,
     });
-  },
+  }
   // Get User Info handler
-  me: async (req: Request, res: Response): Promise<void> => {
+  async me(req: Request, res: Response): Promise<void> {
     const result = await authService.me(req as AuthenticatedRequest);
     res.status(result?.status || 200).json({
       status: result?.status,
       data: result?.data,
     });
-  },
+  }
 
-  csrfToken: async (req: Request, res: Response) => {
+  async csrfToken(req: Request, res: Response) {
     const result = await authService.csrfTokenService(req);
     sendResponse(res, {
       status: result?.status,
       data: result?.data,
       httpCode: result?.code,
     });
-  },
-};
+  }
+}
 
-export default AuthController;
+export default new AuthController();

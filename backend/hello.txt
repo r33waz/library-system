@@ -1,22 +1,24 @@
 # port 
 PORT=8000
 
+NODE_ENV=development
+
 
 # jwt secret
-ACCESS_TOKEN_SECRET=Acc3SS_T@k3n_S3cr3t
-REFRESH_TOKEN_SECRET=R3fr3sh_T@k3n_S3cr3t
+ACCESS_TOKEN=Acc3SS_T@k3n_S3cr3t
+REFRESH_TOKEN=R3fr3sh_T@k3n_S3cr3t
 
 
 #database configuration
-DB_PORT=,
-DB_USER=
-DB_PASSWORD=,
-DB_NAME=,
-DB_HOST=,
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=r33w@z@123
+DB_NAME=library_management
+DB_HOST=localhost
 
 #redis configuration
 REDIS_HOST=fleet-squirrel-9224.upstash.io
-REDIS_RPASSWORD=ASQIAAImcDI5ZDAyODU4ZDA0OGI0ZDg3YWY0ODE1NTU0MzRkMjY1ZHAyOTIyNA
+REDIS_PASSWORD=ASQIAAImcDI5ZDAyODU4ZDA0OGI0ZDg3YWY0ODE1NTU0MzRkMjY1ZHAyOTIyNA
 
 # fire base 
 FIREBASE_ADMIN_JSON = ../constant/librarymanagement.json

@@ -39,7 +39,7 @@ export const googleLoginThunk = createAsyncThunk(
       console.log("🚀 ~ idToken:", idToken)
 
       const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google-login`,
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/google-login`,
         {
           method: "POST",
           headers: {
@@ -68,6 +68,7 @@ export const authorizeThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const resp = await main_url.get(endPoints?.authorize);
+      
       return resp.data;
     } catch (error: any) {
       return rejectWithValue(error);

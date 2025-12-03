@@ -26,7 +26,7 @@ export function setCsrfCookie(req: Request, res: Response, next: NextFunction) {
     res.cookie("csrfSecret", secret, {
       httpOnly: false,
       secure: false,
-      sameSite: "strict",
+      sameSite: "lax",
     });
   }
   next();

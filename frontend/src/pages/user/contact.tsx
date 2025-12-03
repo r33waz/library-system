@@ -32,7 +32,7 @@ const ContactPage = () => {
   }, [messageValue]);
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="">
       <BreadCrumb
         items={[{ label: "Home", href: "/e-book/home" }, { label: "Contact" }]}
       />
