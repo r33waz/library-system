@@ -3,6 +3,7 @@ import BaseEntity from "../constant/base.entity";
 import { MEDIA_TYPE } from "../constant/enum";
 import Admin from "./admin.entity";
 import Book from "./book.entity";
+import Category from "./category.entity";
 import Genre from "./genre.entity";
 import Library from "./library.entity";
 import { LibraryEmp } from "./libraryEmp.entity";
@@ -77,6 +78,14 @@ export class Media extends BaseEntity {
   })
   @JoinColumn({ name: "genreId" })
   genrePic: Genre;
+
+  @OneToOne(() => Category, (genre) => genre.categoryPic, {
+    onDelete: "CASCADE",
+    orphanedRowAction: "delete",
+    nullable: true,
+  })
+  @JoinColumn({ name: "categoryId" })
+  categoryPic: Genre;
 }
 
 export default Media;

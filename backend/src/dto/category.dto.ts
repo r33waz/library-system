@@ -1,14 +1,22 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IMedia } from "../interface/media.interface";
 
-class CategoryDto {
+class CreateCategoryDto {
   @IsNotEmpty()
   @IsString()
   name: string;
+
+  @IsNotEmpty()
+  media: IMedia;
 }
 
 class UpdateCategoryDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsString()
-  name: string;
+  name?: string;
+
+  @IsOptional()
+  media?: IMedia;
 }
-export { CategoryDto, UpdateCategoryDto };
+
+export { CreateCategoryDto, UpdateCategoryDto };

@@ -12,12 +12,10 @@ import { createToken } from "../middleware/crsf.middleware";
 import messages from "../utils/message";
 import sendMail from "../utils/sendMail";
 
-const authRepository = AppDataSource.getRepository(Auth);
+class AuthService {
+  private authRepository = AppDataSource.getRepository(Auth);
 
-// authService.ts
-const AuthService = {
-  // Login service
-  loginService: async (body: ILogin, response: Response) => {
+  async login(body: ILogin, response: Response) {
     try {
       const { email, password } = body;
       if (!email || !password) {
@@ -28,7 +26,7 @@ const AuthService = {
         };
       }
 
-      const user = await authRepository
+      const user = await this.authRepository
         .createQueryBuilder("auth")
         .leftJoinAndSelect("auth.user", "user")
         .leftJoinAndSelect("auth.admin", "admin")
@@ -86,7 +84,7 @@ const AuthService = {
         role,
       });
 
-      await authRepository.save(user);
+      await this.authRepository.save(user);
 
       // Store the tokens in cookies
       response.cookie("accessToken", accessToken, {
@@ -114,10 +112,9 @@ const AuthService = {
         message: messages?.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  // google login
-  googleLoginService: async (req: Request, res: Response) => {
+  async googleLoginService(req: Request, res: Response) {
     const idToken = req.headers.authorization?.split(" ")[1] as string;
     console.log("🚀 ~ googleLoginService: ~ idToken:", idToken);
 
@@ -153,7 +150,7 @@ const AuthService = {
       }
 
       // Try to find existing user
-      let user = await authRepository
+      let user = await this.authRepository
         .createQueryBuilder("auth")
         .leftJoinAndSelect("auth.user", "user")
         .leftJoinAndSelect("auth.admin", "admin")
@@ -274,36 +271,46 @@ const AuthService = {
         message: messages?.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  signUpService: async (req: Request) => {
-    const { firstname, lastname, middlename, email, password } = req?.body;
+  async signUpService(req: Request) {
+    const { firstname, lastname, middlename, email, password } = req.body;
 
     try {
-      const existingUser = await authRepository.findOneBy({ email });
-      if (existingUser)
+      // Check for existing user
+      const existingUser = await this.authRepository.findOneBy({ email });
+      if (existingUser) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
-          message: messages?.errorMessages?.alreadyExists,
+          message: messages.errorMessages.alreadyExists,
         };
+      }
 
       const hashedPassword = await hashPassword(password);
 
-      await AppDataSource.transaction(async (transactionalEntityManager) => {
-        const user = new User();
-        (user.firstname = firstname),
-          (user.lastname = lastname),
-          (user.middlename = middlename),
-          await transactionalEntityManager.save(user);
+      // STEP 1 — Perform DB writes inside a transaction
+      const { user, auth } = await AppDataSource.transaction(
+        async (transaction) => {
+          const user = transaction.create(User, {
+            firstname,
+            lastname,
+            middlename,
+          });
+          await transaction.save(user);
 
-        const auth = new Auth();
-        auth.email = email;
-        auth.password = hashedPassword;
-        auth.user = user;
-        await transactionalEntityManager.save(auth);
-      });
+          const auth = transaction.create(Auth, {
+            email,
+            password: hashedPassword,
+            user,
+          });
+          await transaction.save(auth);
 
+          return { user, auth };
+        }
+      );
+
+      // STEP 2 — Email sending (outside DB transaction)
       const recipientEmails = [email];
       const emailHTML = generateEmailHTML(
         email,
@@ -312,27 +319,44 @@ const AuthService = {
         lastname
       );
       const emailText = "Your account has been created";
-      await sendMail(recipientEmails, emailText, emailHTML);
 
+      try {
+        await sendMail(recipientEmails, emailText, emailHTML);
+      } catch (emailErr) {
+        console.error("Email failed. Rolling back new user...", emailErr);
+
+        // STEP 3 — Manual rollback if email fails
+        await AppDataSource.getRepository(Auth).delete({ id: auth.id });
+        await AppDataSource.getRepository(User).delete({ id: user.id });
+
+        return {
+          code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+          status: false,
+          message: "Signup failed. Could not send confirmation email.",
+        };
+      }
+
+      // STEP 4 — Final response on success
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
-        message: messages?.successMessages?.authentication?.register,
+        message: messages.successMessages.authentication.register,
       };
     } catch (error) {
-      console.log("🚀 ~ signUpService: ~ error:", error);
+      console.log("🚀 ~ signUpService error:", error);
+
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
         status: false,
-        message: messages?.errorMessages.serverError,
+        message: messages.errorMessages.serverError,
       };
     }
-  },
+  }
 
-  authorizeUser: async (req: AuthenticatedRequest, res: Response) => {
+  async authorizeUser(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req?.user;
-      const user = await AppDataSource.getRepository(Auth)
+      const user = await this.authRepository
         .createQueryBuilder("auth")
         .leftJoinAndSelect("auth.user", "user")
         .leftJoinAndSelect("auth.admin", "admin")
@@ -376,13 +400,13 @@ const AuthService = {
         code: STATUS_CODE.UNAUTHORIZED,
       };
     }
-  },
+  }
 
-  me: async (req: AuthenticatedRequest) => {
+  async me(req: AuthenticatedRequest) {
     try {
       const { id } = req.user;
 
-      const user = await AppDataSource.getRepository(Auth)
+      const user = await this.authRepository
         .createQueryBuilder("auth")
         .leftJoinAndSelect("auth.user", "user")
         .leftJoinAndSelect("auth.admin", "admin")
@@ -403,7 +427,6 @@ const AuthService = {
         user?.libraryEmp?.role;
 
       // Attach role to the user
-    
 
       if (!user) {
         return {
@@ -415,7 +438,7 @@ const AuthService = {
       // Remove null values
       return {
         status: STATUS_CODE.SUCCESS,
-        data: {...user, role},
+        data: { ...user, role },
       };
     } catch (error) {
       console.log("🚀 ~ me: ~ error:", error);
@@ -424,9 +447,9 @@ const AuthService = {
         message: messages?.errorMessages.serverError,
       };
     }
-  },
+  }
 
-  csrfTokenService: async (req: Request) => {
+  async csrfTokenService(req: Request) {
     const secret = req.cookies.csrfSecret;
     if (!secret) {
       return {
@@ -443,16 +466,18 @@ const AuthService = {
       data: token,
       code: STATUS_CODE.SUCCESS,
     };
-  },
-  logoutService: async (response: Response) => {
+  }
+
+  async logoutService(response: Response) {
     response.clearCookie("accessToken");
     response.clearCookie("refreshToken");
+    response.clearCookie("csrfSecret"); 
     return {
       status: STATUS_CODE.SUCCESS,
       message: messages?.successMessages?.authentication?.logout,
     };
-  },
-};
+  }
+}
 
 const generateEmailHTML = (
   email: string,
@@ -495,4 +520,4 @@ const generateEmailHTML = (
 `;
 };
 
-export default AuthService;
+export default new AuthService();

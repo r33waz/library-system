@@ -1,6 +1,6 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
-import { STATUS_CODE } from "../constant/enum";
+import { MEDIA_TYPE, STATUS_CODE } from "../constant/enum";
 import Category from "../entitys/category.entity";
 import messages from "../utils/message";
 import { getFromCache, setToCache } from "../utils/redisClient";
@@ -11,7 +11,7 @@ const categoryRepo = AppDataSource.getRepository(Category);
 const CategoryService = {
   create: async (req: Request) => {
     try {
-      const { name } = req.body;
+      const { name, media } = req.body;
       const existingCategory = await categoryRepo.findOneBy({ name });
       if (existingCategory) {
         return {
@@ -27,6 +27,11 @@ const CategoryService = {
         name: name,
         slug: slug,
       });
+
+      if (media && media.mediaType === MEDIA_TYPE.CATEGORY_PIC) {
+        newCategory.categoryPic = media;
+      }
+
       await categoryRepo.save(newCategory);
       return {
         code: STATUS_CODE.CREATED,
@@ -60,7 +65,7 @@ const CategoryService = {
       const query = categoryRepo
         .createQueryBuilder("category")
         .select(["category.id", "category.name", "category.slug"])
-        // .leftJoinAndSelect("genre.genrePic", "genrePic");
+        .leftJoinAndSelect("category.categoryPic.", "categoryPic");
 
       if (search) {
         query.where("category.name LIKE :search", { search: `%${search}%` });

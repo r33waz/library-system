@@ -50,6 +50,7 @@ export enum MEDIA_TYPE {
   BOOK = "BOOK",
   COVER_IMAGE = "COVER_IMAGE",
   GENRE_PIC = "GENRE_PIC",
+  CATEGORY_PIC = "CATEGORY_PIC",
 }
 
 export const BookGenres = {
