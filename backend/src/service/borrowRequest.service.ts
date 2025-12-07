@@ -1,12 +1,12 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { BORROWER_STATUS, STATUS_CODE } from "../constant/enum";
-import { Auth } from "../entitys/auth.enity";
-import { Bill } from "../entitys/bill.entity";
-import Book from "../entitys/book.entity";
-import { BorrowRequest } from "../entitys/borrow_request.entity";
-import Library from "../entitys/library.entity";
-import User from "../entitys/user.entity";
+import { Auth } from "../entities/auth.enity";
+import { Bill } from "../entities/bill.entity";
+import Book from "../entities/book.entity";
+import { BorrowRequest } from "../entities/borrow_request.entity";
+import Library from "../entities/library.entity";
+import User from "../entities/user.entity";
 import { AuthRequest } from "../interface/auth.Interface";
 import { billPrice, borrowDaysDiff } from "../utils/billUtils";
 import messages from "../utils/message";

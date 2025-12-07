@@ -1,10 +1,10 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { STATUS_CODE } from "../constant/enum";
-import { Auth } from "../entitys/auth.enity";
-import Library from "../entitys/library.entity";
-import { LibraryEmp } from "../entitys/libraryEmp.entity";
-import Media from "../entitys/media.entity";
+import { Auth } from "../entities/auth.enity";
+import Library from "../entities/library.entity";
+import { LibraryEmp } from "../entities/libraryEmp.entity";
+import Media from "../entities/media.entity";
 import { hashPassword } from "../helper/passwordHelper";
 import messages from "../utils/message";
 import runInTransaction from "../utils/transaction";

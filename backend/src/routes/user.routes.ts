@@ -6,14 +6,13 @@ import { authenticateUser, authorizeUser } from "../middleware/auth.middleware";
 import { validateDto } from "../middleware/RequestValidator";
 
 const router = express.Router();
+router.use(authenticateUser);
 router.patch(
   "/update-user/:id",
   validateDto(UpdateUserDTO),
   UserController.update
 );
-router.get("/list", UserController.getAllUsers);
-router.use(authenticateUser);
-
 router.use(authorizeUser([ROLES?.SUDO_ADMIN]));
+router.get("/list", UserController.getAllUsers);
 
 export default router;

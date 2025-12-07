@@ -62,4 +62,59 @@ class BookDto {
   media: IMedia[];
 }
 
-export default BookDto;
+class UpdateBookDto {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
+
+  @IsOptional()
+  title: string;
+
+  @IsOptional()
+  author: string;
+
+  @IsOptional()
+  genre: string;
+
+  @IsOptional()
+  @IsInt()
+  rating: number;
+
+  @IsOptional()
+  coverImage: string;
+
+  @IsOptional()
+  coverColor: string;
+
+  @IsOptional()
+  description: string;
+
+  @IsOptional()
+  @IsInt()
+  totalCopies: number;
+
+  @IsOptional()
+  @IsInt()
+  availableCopies: number;
+
+  @IsOptional()
+  neplaiVideoUrl: string;
+
+  @IsOptional()
+  englishVideoUrl: string;
+
+  @IsOptional()
+  hindiVideoUrl: string;
+
+  @IsOptional()
+  summary: string;
+
+  @IsNumber()
+  @IsOptional()
+  price: number;
+
+  @IsOptional()
+  media: IMedia[];
+}
+
+export { BookDto, UpdateBookDto };

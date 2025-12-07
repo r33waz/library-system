@@ -3,8 +3,8 @@ import cron from "node-cron";
 import { LessThanOrEqual } from "typeorm";
 import AppDataSource from "../../config/db.config";
 import { BORROWER_STATUS } from "../../constant/enum";
-import { Bill } from "../../entitys/bill.entity";
-import { BorrowRequest } from "../../entitys/borrow_request.entity";
+import { Bill } from "../../entities/bill.entity";
+import { BorrowRequest } from "../../entities/borrow_request.entity";
 import { billPrice, borrowDaysDiff, calculatePenalty } from "../billUtils";
 
 cron.schedule("0 0 * * *", async () => {

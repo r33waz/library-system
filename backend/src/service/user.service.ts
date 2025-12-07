@@ -1,8 +1,8 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { MEDIA_TYPE, STATUS_CODE } from "../constant/enum";
-import { Auth } from "../entitys/auth.enity";
-import User from "../entitys/user.entity";
+import { Auth } from "../entities/auth.enity";
+import User from "../entities/user.entity";
 import { hashPassword } from "../helper/passwordHelper";
 import messages from "../utils/message";
 import { validatePagination } from "../utils/pegniation";

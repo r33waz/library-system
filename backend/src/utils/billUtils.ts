@@ -3,7 +3,7 @@ import cron from "node-cron";
 import { LessThan } from "typeorm";
 import AppDataSource from "../config/db.config";
 import { BORROWER_STATUS } from "../constant/enum";
-import { BorrowRequest } from "../entitys/borrow_request.entity";
+import { BorrowRequest } from "../entities/borrow_request.entity";
 
 export const borrowDaysDiff = ({
   startDate,

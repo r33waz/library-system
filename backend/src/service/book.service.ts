@@ -1,19 +1,24 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { MEDIA_TYPE, STATUS_CODE } from "../constant/enum";
-import { Auth } from "../entitys/auth.enity";
-import Book from "../entitys/book.entity";
+import { Auth } from "../entities/auth.enity";
+import Book from "../entities/book.entity";
 import messages from "../utils/message";
 import { getPagingData, validatePagination } from "../utils/pegniation";
-import { deleteFromCacheByPrefix, getFromCache, setToCache } from "../utils/redisClient";
+import {
+  deleteFromCacheByPrefix,
+  getFromCache,
+  setToCache,
+} from "../utils/redisClient";
 import sendMail from "../utils/sendMail";
 import { Slug } from "../utils/slugify";
 
-const bookRepo = AppDataSource.getRepository(Book);
-const authRepo = AppDataSource.getRepository(Auth);
-const BookService = {
+class BookService {
+  private authRepository = AppDataSource.getRepository(Auth);
+  private bookRepository = AppDataSource.getRepository(Book);
   // create the book route
-  create: async (req: Request) => {
+
+  async create(req: Request) {
     try {
       const {
         title,
@@ -35,7 +40,7 @@ const BookService = {
 
       const slug = Slug(title);
 
-      const newBook = bookRepo.create({
+      const newBook = this.bookRepository.create({
         title,
         slug,
         author,
@@ -56,10 +61,10 @@ const BookService = {
         newBook.coverImage = media;
       }
 
-      await bookRepo.save(newBook);
+      await this.bookRepository.save(newBook);
 
       deleteFromCacheByPrefix(`books:page=`); // Invalidate all book caches'
-      
+
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
@@ -73,10 +78,10 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // get all the books
-  getAll: async (req: Request) => {
+  async getAll(req: Request) {
     try {
       const [page, perpage] = validatePagination(
         req.query.page as string,
@@ -101,7 +106,7 @@ const BookService = {
       }
 
       // ❌ Step 2: Cache miss, fetch from DB
-      let idQuery = AppDataSource.getRepository(Book)
+      let idQuery = this.bookRepository
         .createQueryBuilder("book")
         .select("book.id");
 
@@ -133,7 +138,7 @@ const BookService = {
         };
       }
 
-      const books = await AppDataSource.getRepository(Book)
+      const books = await this.bookRepository
         .createQueryBuilder("book")
         .leftJoinAndSelect("book.genre", "genre")
         .leftJoinAndSelect("book.category", "category")
@@ -164,13 +169,13 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // get single book
-  getOne: async (req: Request) => {
+  async getOne(req: Request) {
     try {
       const { id } = req.params;
-      const book = await bookRepo
+      const book = await this.bookRepository
         .createQueryBuilder("book")
         .leftJoinAndSelect("book.genre", "genre")
         .leftJoinAndSelect("book.category", "category")
@@ -201,10 +206,10 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // update boook
-  update: async (req: Request) => {
+  async update(req: Request) {
     try {
       const { id } = req.params;
       const {
@@ -221,7 +226,7 @@ const BookService = {
         media,
       } = req.body;
 
-      const book = await bookRepo.findOneBy({ id: id });
+      const book = await this.bookRepository.findOneBy({ id: id });
 
       if (!book) {
         return {
@@ -256,7 +261,7 @@ const BookService = {
 
       book.summary = summary ? summary : book.summary;
 
-      await bookRepo.save(book);
+      await this.bookRepository.save(book);
 
       return {
         code: STATUS_CODE.SUCCESS,
@@ -270,15 +275,15 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // delete the book
-  delete: async (req: Request) => {
+  async delete(req: Request) {
     try {
       const { id } = req.params;
 
       // Check if the record exists before deletion
-      const existingBook = await bookRepo.findOneBy({ id: id });
+      const existingBook = await this.bookRepository.findOneBy({ id: id });
 
       if (!existingBook) {
         return {
@@ -288,7 +293,7 @@ const BookService = {
       }
 
       // Perform the deletion
-      await bookRepo.delete({ id });
+      await this.bookRepository.delete({ id });
 
       return {
         status: STATUS_CODE.SUCCESS,
@@ -300,12 +305,12 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // get latest book
-  latestBook: async (req: Request) => {
+  async latestBook(req: Request) {
     try {
-      const books = await bookRepo
+      const books = await this.bookRepository
         .createQueryBuilder("book")
         .select([
           "book.id",
@@ -318,7 +323,7 @@ const BookService = {
         .orderBy("book.created_at", "DESC")
         .limit(5)
         .getMany();
-      console.log("🚀 ~ books:", books)
+      console.log("🚀 ~ books:", books);
       return { code: STATUS_CODE.SUCCESS, status: true, data: books };
     } catch (error) {
       return {
@@ -327,14 +332,14 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
   // get book by library
-  getBooksByLibrary: async (req: Request) => {
+  async getBooksByLibrary(req: Request) {
     try {
       const { id } = req.params;
       const search = req.query.search;
-      console.log("🚀 ~ getBooksByLibrary: ~ search:", search)
+      console.log("🚀 ~ getBooksByLibrary: ~ search:", search);
       const genre = req.query.genre;
       const category = req.query.category;
       const [page, perpage] = validatePagination(
@@ -352,7 +357,7 @@ const BookService = {
         };
       }
 
-      let idQuery = AppDataSource.getRepository(Book)
+      let idQuery = this.bookRepository
         .createQueryBuilder("book")
         .select("book.id");
 
@@ -384,7 +389,7 @@ const BookService = {
         };
       }
 
-      const books = await AppDataSource.getRepository(Book)
+      const books = await this.bookRepository
         .createQueryBuilder("book")
         .leftJoinAndSelect("book.genre", "genre")
         .leftJoinAndSelect("book.category", "category")
@@ -413,56 +418,54 @@ const BookService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
-};
-
-// send latest book email to the user
-const sendLatestBook = async () => {
-  try {
-    const books = await bookRepo
-      .createQueryBuilder("book")
-      .leftJoinAndSelect("book.genre", "genre")
-      .leftJoinAndSelect("book.coverImage", "coverImage")
-      .orderBy("book.created_at", "DESC")
-      .limit(5)
-      .getMany();
-
-    if (!books.length) {
-      throw new Error("No books found.");
-    }
-
-    const users = await authRepo
-      .createQueryBuilder("auth")
-      .select(["auth.id", "auth.email"])
-      .leftJoin("auth.user", "user")
-      .addSelect("user.role")
-      .leftJoin("auth.admin", "admin")
-      .addSelect("admin.role")
-      .getMany();
-
-    if (!users.length) {
-      throw new Error("No users found.");
-    }
-
-    const recipientEmails = users.map((user) => user.email);
-    const emailHTML = generateEmailHTML(books);
-    const emailText = "Latest books";
-
-    await sendMail(recipientEmails, emailText, emailHTML);
-    return {
-      status: STATUS_CODE.SUCCESS,
-      message: "Latest books email sent successfully!",
-      data: books,
-    };
-  } catch (error) {
-    return {
-      status: STATUS_CODE.INTERNAL_SERVER_ERROR,
-      message: messages.errorMessages?.serverError,
-    };
   }
-};
 
-// Generate the HTML content for the email
+  async sendLatestBook() {
+    try {
+      const books = await this.bookRepository
+        .createQueryBuilder("book")
+        .leftJoinAndSelect("book.genre", "genre")
+        .leftJoinAndSelect("book.coverImage", "coverImage")
+        .orderBy("book.created_at", "DESC")
+        .limit(5)
+        .getMany();
+
+      if (!books.length) {
+        throw new Error("No books found.");
+      }
+
+      const users = await this.authRepository
+        .createQueryBuilder("auth")
+        .select(["auth.id", "auth.email"])
+        .leftJoin("auth.user", "user")
+        .addSelect("user.role")
+        .leftJoin("auth.admin", "admin")
+        .addSelect("admin.role")
+        .getMany();
+
+      if (!users.length) {
+        throw new Error("No users found.");
+      }
+
+      const recipientEmails = users.map((user) => user.email);
+      const emailHTML = generateEmailHTML(books);
+      const emailText = "Latest books";
+
+      await sendMail(recipientEmails, emailText, emailHTML);
+      return {
+        status: STATUS_CODE.SUCCESS,
+        message: "Latest books email sent successfully!",
+        data: books,
+      };
+    } catch (error) {
+      return {
+        status: STATUS_CODE.INTERNAL_SERVER_ERROR,
+        message: messages.errorMessages?.serverError,
+      };
+    }
+  }
+}
+
 const generateEmailHTML = (books: any[]) => {
   return `
 <!DOCTYPE html>
@@ -622,4 +625,4 @@ const generateEmailHTML = (books: any[]) => {
 //   }
 // });
 
-export default BookService;
+export default new BookService();

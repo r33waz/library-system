@@ -2,7 +2,7 @@ import "dotenv/config";
 import "reflect-metadata";
 import { CategorySeedData } from "../config/data-source";
 import AppDataSource from "../config/db.config";
-import Category from "../entitys/category.entity";
+import Category from "../entities/category.entity";
 import { ICategory } from "../interface/seederInterface";
 import { Slug } from "../utils/slugify";
 

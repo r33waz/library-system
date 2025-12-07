@@ -2,9 +2,9 @@ import moment from "moment";
 import { Between } from "typeorm";
 import AppDataSource from "../config/db.config";
 import { BORROWER_STATUS, STATUS_CODE } from "../constant/enum";
-import { Auth } from "../entitys/auth.enity";
-import Book from "../entitys/book.entity";
-import { BorrowRequest } from "../entitys/borrow_request.entity";
+import { Auth } from "../entities/auth.enity";
+import Book from "../entities/book.entity";
+import { BorrowRequest } from "../entities/borrow_request.entity";
 import { AuthRequest } from "../interface/auth.Interface";
 import messages from "../utils/message";
 import { getFromCache, setToCache } from "../utils/redisClient";
@@ -14,13 +14,8 @@ class LibraryDashboardService {
   private borrowRequestRepository = AppDataSource.getRepository(BorrowRequest);
   private authRepository = AppDataSource.getRepository(Auth);
 
-  async LibraryStast(req: AuthRequest) {
-    const authId = req.user?.id;
-    console.log(
-      "🚀 ~ LibraryDashboardService ~ LibraryStast ~ authId:",
-      authId
-    );
-
+  // ✅ CENTRALIZED LIBRARY ID FETCH
+  private async getLibraryId(authId: string) {
     const library = await this.authRepository
       .createQueryBuilder("auth")
       .leftJoinAndSelect("auth.library", "library")
@@ -28,21 +23,21 @@ class LibraryDashboardService {
       .leftJoinAndSelect("libraryEmp.library", "libraryId")
       .where("auth.id = :id", { id: authId })
       .getOne();
-    console.log(
-      "🚀 ~ LibraryDashboardService ~ LibraryStast ~ library:",
-      library
-    );
 
-    let libraryId: string | undefined;
+    return library?.library?.id || library?.libraryEmp?.library?.id;
+  }
 
-    if (library) {
-      libraryId = library?.library?.id || library?.libraryEmp?.library?.id;
+  async LibraryStast(req: AuthRequest) {
+    const authId = req.user?.id as string;
+    const libraryId = await this.getLibraryId(authId);
+
+    if (!libraryId) {
+      return {
+        code: STATUS_CODE.BAD_REQUEST,
+        status: false,
+        message: "Library not found",
+      };
     }
-
-    console.log(
-      "🚀 ~ LibraryDashboardService ~ LibraryStast ~ libraryId:",
-      libraryId
-    );
 
     const { fromDate: startDate, toDate: endDate } = req.query;
 
@@ -51,9 +46,6 @@ class LibraryDashboardService {
     }`;
 
     try {
-      // Try to get from cache first
-
-      // Build date filter if dates exist
       let whereDateRange: any = { library: { id: libraryId } };
 
       if (startDate && endDate) {
@@ -63,45 +55,27 @@ class LibraryDashboardService {
           .toDate();
         whereDateRange.createdAt = Between(start, end);
       }
-      // else no createdAt filter → get all data for library
 
       const books = await this.bookRepository.count({ where: whereDateRange });
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryStast ~ books:",
-        books
-      );
 
       const borrowRequests = await this.borrowRequestRepository.count({
         where: whereDateRange,
       });
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryStast ~ borrowRequests:",
-        borrowRequests
-      );
 
-      const pendingBorrowRequests = await this.borrowRequestRepository.count({
-        where: { ...whereDateRange, status: BORROWER_STATUS.PENDING },
-      });
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryStast ~ pendingBorrowRequests:",
-        pendingBorrowRequests
-      );
+      const pendingBorrowRequests =
+        await this.borrowRequestRepository.count({
+          where: { ...whereDateRange, status: BORROWER_STATUS.PENDING },
+        });
 
-      const acceptedBorrowRequests = await this.borrowRequestRepository.count({
-        where: { ...whereDateRange, status: BORROWER_STATUS.BORROWED },
-      });
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryStast ~ acceptedBorrowRequests:",
-        acceptedBorrowRequests
-      );
+      const acceptedBorrowRequests =
+        await this.borrowRequestRepository.count({
+          where: { ...whereDateRange, status: BORROWER_STATUS.BORROWED },
+        });
 
-      const overdueBorrowRequests = await this.borrowRequestRepository.count({
-        where: { ...whereDateRange, status: BORROWER_STATUS.OVERDUE },
-      });
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryStast ~ overdueBorrowRequests:",
-        overdueBorrowRequests
-      );
+      const overdueBorrowRequests =
+        await this.borrowRequestRepository.count({
+          where: { ...whereDateRange, status: BORROWER_STATUS.OVERDUE },
+        });
 
       return {
         code: STATUS_CODE.SUCCESS,
@@ -125,25 +99,25 @@ class LibraryDashboardService {
   }
 
   async LibraryBorrowerStast(req: AuthRequest) {
-    const authId = req?.user?.id;
+    const authId = req?.user?.id as string;
     const fromDate = req?.query?.fromDate;
     const toDate = req?.query?.toDate;
 
     try {
-      const library = await this.authRepository
-        .createQueryBuilder("auth")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-        .where("auth.id = :id", { id: authId })
-        .getOne();
+      const libraryId = await this.getLibraryId(authId);
 
-      let libraryId: string | undefined;
-
-      if (library?.id) {
-        libraryId = library?.library?.id || library?.libraryEmp?.library?.id;
+      if (!libraryId) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Library not found",
+        };
       }
 
-      const redisKey = `libraryBorrowerStast:${libraryId}`;
+      const redisKey = `libraryBorrowerStast:${libraryId}:${fromDate ?? "all"}:${
+        toDate ?? "all"
+      }`;
+
       const cached = await getFromCache(redisKey);
       if (cached) {
         return {
@@ -198,28 +172,22 @@ class LibraryDashboardService {
   }
 
   async LibraryGenreDistribution(req: AuthRequest) {
-    const authId = req?.user?.id;
+    const authId = req?.user?.id as string;
+
     try {
-      const library = await this.authRepository
-        .createQueryBuilder("auth")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-         .leftJoinAndSelect("libraryEmp.library", "libraryId")
-        .where("auth.id = :id", { id: authId })
-        .getOne();
+      const libraryId = await this.getLibraryId(authId);
 
-      let libraryId: string | undefined;
-
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryGenreDistribution ~ library:",
-        library
-      );
-      if (library) {
-        libraryId = library?.library?.id || library?.libraryEmp?.library?.id;
+      if (!libraryId) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Library not found",
+        };
       }
 
       const redisKey = `libraryGenreDistribution:${libraryId}`;
       const cached = await getFromCache(redisKey);
+
       if (cached) {
         return {
           code: STATUS_CODE.SUCCESS,
@@ -238,23 +206,17 @@ class LibraryDashboardService {
         .groupBy("genre.name")
         .getRawMany();
 
-      console.log(
-        "🚀 ~ LibraryDashboardService ~ LibraryGenreDistribution ~ genreDistribution:",
-        genreDistribution
-      );
-
       const data = genreDistribution.map((row) => ({
         genre: row.genre,
         count: Number(row.count),
       }));
 
-      // expire in 1 hour
       await setToCache(redisKey, data, 3600);
 
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
-        data: data,
+        data,
       };
     } catch (error) {
       return {
@@ -267,23 +229,20 @@ class LibraryDashboardService {
 
   async LibraryCatergoryDistribution(req: AuthRequest) {
     try {
-      const authId = req?.user?.id;
-      const library = await this.authRepository
-        .createQueryBuilder("auth")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-        .leftJoinAndSelect("libraryEmp.library","libraryid")
-        .where("auth.id = :id", { id: authId })
-        .getOne();
+      const authId = req?.user?.id as string;
+      const libraryId = await this.getLibraryId(authId);
 
-      let libraryId: string | undefined;
-
-      if (library?.id) {
-        libraryId = library?.library?.id || library?.libraryEmp?.library?.id;
+      if (!libraryId) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Library not found",
+        };
       }
 
       const redisKey = `libraryCatergoryDistribution:${libraryId}`;
       const cached = await getFromCache(redisKey);
+
       if (cached) {
         return {
           code: STATUS_CODE.SUCCESS,
@@ -308,10 +267,11 @@ class LibraryDashboardService {
       }));
 
       await setToCache(redisKey, data, 3600);
+
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
-        data: data,
+        data,
       };
     } catch (error) {
       return {
@@ -322,15 +282,12 @@ class LibraryDashboardService {
     }
   }
 
-  // library borrw request stat according to date filter for barchart
   async LibraryBorrowRequestStat(req: AuthRequest) {
-    try {
-      const authId = req?.user?.id;
-      const fromDate = req?.query.fromDate;
-      const endDate = req?.query?.endDate;
-
-      // finding the library
-    } catch (error) {}
+    return {
+      code: STATUS_CODE.BAD_REQUEST,
+      status: false,
+      message: "Feature not implemented yet",
+    };
   }
 }
 
