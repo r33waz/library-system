@@ -1,7 +1,7 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { STATUS_CODE } from "../constant/enum";
-import { Bill } from "../entitys/bill.entity";
+import { Bill } from "../entities/bill.entity";
 import { AuthRequest } from "../interface/auth.Interface";
 import messages from "../utils/message";
 

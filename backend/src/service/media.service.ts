@@ -1,6 +1,6 @@
 import AppDataSource from "../config/db.config";
 import { STATUS_CODE } from "../constant/enum";
-import Media from "../entitys/media.entity";
+import Media from "../entities/media.entity";
 import { uploadResult } from "../middleware/multer";
 
 const MediaService = {

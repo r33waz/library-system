@@ -2,7 +2,7 @@ import "dotenv/config";
 import "reflect-metadata";
 import { GenreSeedData } from "../config/data-source";
 import AppDataSource from "../config/db.config";
-import Genre from "../entitys/genre.entity";
+import Genre from "../entities/genre.entity";
 import { IGenre } from "../interface/seederInterface";
 import { Slug } from "../utils/slugify";
 

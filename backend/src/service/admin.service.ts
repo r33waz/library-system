@@ -1,9 +1,9 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { STATUS_CODE } from "../constant/enum";
-import Admin from "../entitys/admin.entity";
-import { Auth } from "../entitys/auth.enity";
-import Library from "../entitys/library.entity";
+import Admin from "../entities/admin.entity";
+import { Auth } from "../entities/auth.enity";
+import Library from "../entities/library.entity";
 import { hashPassword } from "../helper/passwordHelper";
 import messages from "../utils/message";
 

@@ -1,16 +1,16 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { STATUS_CODE } from "../constant/enum";
-import User from "../entitys/user.entity";
-import WishList from "../entitys/wishList.entity";
+import User from "../entities/user.entity";
+import WishList from "../entities/wishList.entity";
 import { AuthRequest } from "../interface/auth.Interface";
 
-const wishListRepository = AppDataSource.getRepository(WishList);
 
-const userRepository = AppDataSource.getRepository(User);
 
-const WishListService = {
-  toggle: async (req: Request) => {
+class WishListService{
+  private  wishListRepository = AppDataSource.getRepository(WishList);
+  private userRepository = AppDataSource.getRepository(User);
+  async toggle(req: Request) {
     const { userId, bookId } = req.body;
     console.log("🚀 ~ toggle: ~ userId, bookId :", userId, bookId);
 
@@ -25,12 +25,12 @@ const WishListService = {
       }
 
       // Check if the item already exists in the wishlist
-      const existingWishList = await wishListRepository.findOne({
+      const existingWishList = await this.wishListRepository.findOne({
         where: { userId, bookId },
       });
 
       if (existingWishList) {
-        await wishListRepository.remove(existingWishList);
+        await this.wishListRepository.remove(existingWishList);
 
         return {
           code: STATUS_CODE.CREATED,
@@ -39,13 +39,13 @@ const WishListService = {
         };
       } else {
         // If the book is not in the wishlist, add it
-        const newWishList = wishListRepository.create({
+        const newWishList = this.wishListRepository.create({
           userId,
           bookId,
           user: { id: userId },
           book: { id: bookId },
         });
-        await wishListRepository.save(newWishList);
+        await this.wishListRepository.save(newWishList);
 
         // Return success response
         return {
@@ -64,15 +64,15 @@ const WishListService = {
         message: "An error occurred while processing your request",
       };
     }
-  },
-  getById: async (req: AuthRequest) => {
+  }
+  async getById(req: AuthRequest){
     try {
       const authId = req.user?.id;
-      const user = await userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: { auth: { id: authId } },
         relations: ["auth"],
       });
-      const wishList = await wishListRepository
+      const wishList = await this.wishListRepository
         .createQueryBuilder("wishlist")
         .leftJoinAndSelect("wishlist.book", "book")
         .leftJoinAndSelect("book.genre", "genre")
@@ -93,7 +93,7 @@ const WishListService = {
         status: false,
       };
     }
-  },
+  }
 };
 
-export default WishListService;
+export default new WishListService();

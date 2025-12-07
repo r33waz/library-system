@@ -1,7 +1,7 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
 import { MEDIA_TYPE, STATUS_CODE } from "../constant/enum";
-import Genre from "../entitys/genre.entity";
+import Genre from "../entities/genre.entity";
 import messages from "../utils/message";
 import { getFromCache, setToCache } from "../utils/redisClient";
 import { Slug } from "../utils/slugify";

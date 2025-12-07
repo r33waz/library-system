@@ -2,10 +2,10 @@ import "dotenv/config";
 import "reflect-metadata";
 import { AdminSeedData } from "../config/data-source";
 import AppDataSource from "../config/db.config";
-import { Auth } from "../entitys/auth.enity";
+import { Auth } from "../entities/auth.enity";
 
 import { BLOCK_STATUS, ROLES, SIGNUPSTATUS } from "../constant/enum";
-import Admin from "../entitys/admin.entity";
+import Admin from "../entities/admin.entity";
 import { hashPassword } from "../helper/passwordHelper";
 import { IAdmin } from "../interface/seederInterface";
 
