@@ -6,13 +6,13 @@ import messages from "../utils/message";
 import { getFromCache, setToCache } from "../utils/redisClient";
 import { Slug } from "../utils/slugify";
 
-const categoryRepo = AppDataSource.getRepository(Category);
 
-const CategoryService = {
-  create: async (req: Request) => {
+class categoryService  {
+  private categoryRepository = AppDataSource.getRepository(Category);
+  async create(req: Request){
     try {
       const { name, media } = req.body;
-      const existingCategory = await categoryRepo.findOneBy({ name });
+      const existingCategory = await this.categoryRepository.findOneBy({ name });
       if (existingCategory) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
@@ -23,7 +23,7 @@ const CategoryService = {
 
       const slug = Slug(name);
 
-      const newCategory = categoryRepo.create({
+      const newCategory = this.categoryRepository.create({
         name: name,
         slug: slug,
       });
@@ -32,7 +32,7 @@ const CategoryService = {
         newCategory.categoryPic = media;
       }
 
-      await categoryRepo.save(newCategory);
+      await this.categoryRepository.save(newCategory);
       return {
         code: STATUS_CODE.CREATED,
         status: true,
@@ -46,9 +46,9 @@ const CategoryService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  getAll: async (req: Request) => {
+  async getAll(req: Request){
     try {
       const search = req.query.search;
 
@@ -62,7 +62,7 @@ const CategoryService = {
         };
       }
 
-      const query = categoryRepo
+      const query = this.categoryRepository
         .createQueryBuilder("category")
         .select(["category.id", "category.name", "category.slug"])
         .leftJoinAndSelect("category.categoryPic.", "categoryPic");
@@ -95,12 +95,12 @@ const CategoryService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  getOne: async (req: Request) => {
+  async getOne(req: Request){
     try {
       const { id } = req.params;
-      const category = await categoryRepo.findOneBy({ id });
+      const category = await this.categoryRepository.findOneBy({ id });
       if (!category) {
         return {
           code: STATUS_CODE.NOT_FOUND,
@@ -120,13 +120,13 @@ const CategoryService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  update: async (req: Request) => {
+  async update(req: Request) {
     try {
       const { id } = req.params;
       const { name } = req.body;
-      const category = await categoryRepo.findOneBy({ id });
+      const category = await this.categoryRepository.findOneBy({ id });
       if (!category) {
         return {
           code: STATUS_CODE.NOT_FOUND,
@@ -135,7 +135,7 @@ const CategoryService = {
         };
       } else {
         category.name = name;
-        await categoryRepo.save(category);
+        await this.categoryRepository.save(category);
         return {
           code: STATUS_CODE.SUCCESS,
           status: true,
@@ -149,12 +149,12 @@ const CategoryService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  delete: async (req: Request) => {
+  async delete(req: Request){
     try {
       const { id } = req.params;
-      const existingCategory = await categoryRepo.findOneBy({ id });
+      const existingCategory = await this.categoryRepository.findOneBy({ id });
       if (!existingCategory) {
         return {
           code: STATUS_CODE.NOT_FOUND,
@@ -162,7 +162,7 @@ const CategoryService = {
           message: messages.errorMessages?.notFound,
         };
       }
-      const result = await categoryRepo.delete(id);
+      const result = await this.categoryRepository.delete(id);
       if (result) {
         return {
           code: STATUS_CODE.SUCCESS,
@@ -183,7 +183,7 @@ const CategoryService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 };
 
-export default CategoryService;
+export default new categoryService();

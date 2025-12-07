@@ -1,49 +1,49 @@
 import { Request, Response } from "express";
-import CategoryService from "../service/category.service";
+import categoryService from "../service/category.service";
 import { sendResponse } from "../utils/responseHandler";
 
-const CategoryController = {
-  create: async (req: Request, res: Response) => {
-    const result = await CategoryService.create(req);
+class categoryController {
+  async create(req: Request, res: Response) {
+    const result = await categoryService.create(req);
     sendResponse(res, {
       status: result?.status,
       message: result?.message,
       httpCode: result?.code,
     });
-  },
-  getAll: async (req: Request, res: Response) => {
-    const result = await CategoryService.getAll(req);
+  }
+  async getAll(req: Request, res: Response){
+    const result = await categoryService.getAll(req);
     sendResponse(res, {
       status: result?.status,
       data: result?.data,
       message: result?.message,
       // httpCode: result?.code,
     });
-  },
-  getOne: async (req: Request, res: Response) => {
-    const result = await CategoryService.getOne(req);
+  }
+  async getOne(req: Request, res: Response) {
+    const result = await categoryService.getOne(req);
     sendResponse(res, {
       status: result?.status,
       data: result?.data,
       httpCode: result?.code,
     });
-  },
-  update: async (req: Request, res: Response) => {
-    const result = await CategoryService.update(req);
+  }
+  async update(req: Request, res: Response){
+    const result = await categoryService.update(req);
     sendResponse(res, {
       status: result?.status,
       message: result?.message,
       httpCode: result?.code,
     });
-  },
-  delete: async (req: Request, res: Response) => {
-    const result = await CategoryService.delete(req);
+  }
+  async delete(req: Request, res: Response) {
+    const result = await categoryService.delete(req);
     sendResponse(res, {
       status: result?.status,
       message: result?.message,
       httpCode: result?.code,
     });
-  },
+  }
 };
 
-export default CategoryController;
+export default new categoryController();

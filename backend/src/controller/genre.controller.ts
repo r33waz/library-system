@@ -1,38 +1,39 @@
 import { Request, Response } from "express";
-import GenreService from "../service/genre.service";
+import genreService from "../service/genre.service";
 import { sendResponse } from "../utils/responseHandler";
 
-const GenreController = {
-    create: async (req: Request, res: Response) => {
-        const result = await GenreService.create(req);
+class genreController  {
+    async create(req: Request, res: Response)  {
+        const result = await genreService.create(req);
         sendResponse(res, {
             status: result?.status,
             message: result?.message,
             httpCode: result?.code
         });
-    },
+    }
 
-    getAll:async(req:Request,res:Response)=>{
-        const result = await GenreService.getAll(req)
+    async getAll(req:Request,res:Response){
+        const result = await genreService.getAll(req)
         sendResponse(res, {
             status: result?.status,
             data: result?.data,
             message: result?.message,
             httpCode: result?.code
         });
-    },
+    }
 
-    update:async(req:Request,res:Response)=>{
-        const result = await GenreService.update(req)
+    async update(req:Request,res:Response){
+        const result = await genreService.update(req)
         console.log("🚀 ~ update:async ~ result:", result)
         sendResponse(res, {
             status: result?.status,
             message: result?.message,
             httpCode:result?.code
         });
-    },
-    delete:async(req:Request,res:Response)=>{
-    const result = await GenreService.delete(req)
+    }
+
+    async delete(req:Request,res:Response){
+    const result = await genreService.delete(req)
     sendResponse(res, {
         status: result?.status,
         message: result?.message,
@@ -42,4 +43,4 @@ const GenreController = {
     }
 };
 
-export default GenreController;
+export default new genreController();

@@ -3,8 +3,8 @@ import { STATUS_CODE } from "../constant/enum";
 import Media from "../entities/media.entity";
 import { uploadResult } from "../middleware/multer";
 
-const MediaService = {
-  uploadMedia: async (files: any | any[], mediaType?: string) => {
+class mediaService  {
+  async uploadMedia(files: any | any[], mediaType?: string)  {
 
     if (!files || (Array.isArray(files) && files.length === 0)) {
       throw new Error("No file(s) uploaded.");
@@ -45,7 +45,7 @@ const MediaService = {
       console.error("Error in media upload:", error);
       throw new Error("Error uploading file(s) to Cloudinary.");
     }
-  },
+  }
 };
 
-export default MediaService;
+export default new mediaService();
