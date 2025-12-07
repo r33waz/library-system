@@ -6,13 +6,13 @@ import messages from "../utils/message";
 import { getFromCache, setToCache } from "../utils/redisClient";
 import { Slug } from "../utils/slugify";
 
-const genreRepository = AppDataSource.getRepository(Genre);
 
-const GenreService = {
-  create: async (req: Request) => {
+class genreService {
+  private genreRepository = AppDataSource.getRepository(Genre);
+ async create(req: Request){
     try {
       const { name, media } = req.body;
-      const existedGenre = await genreRepository.findOneBy({ name });
+      const existedGenre = await this.genreRepository.findOneBy({ name });
       if (existedGenre) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
@@ -23,7 +23,7 @@ const GenreService = {
 
       const slug = Slug(name);
 
-      const genre = genreRepository.create({
+      const genre = this.genreRepository.create({
         name: name,
         slug: slug,
       });
@@ -32,7 +32,7 @@ const GenreService = {
         genre.genrePic = media;
       }
 
-      await genreRepository.save(genre);
+      await this.genreRepository.save(genre);
       return {
         code: STATUS_CODE.CREATED,
         status: true,
@@ -46,9 +46,9 @@ const GenreService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  getAll: async (req: Request) => {
+ async getAll(req: Request) {
     try {
       const search = req.query.search;
 
@@ -62,7 +62,7 @@ const GenreService = {
         };
       }
 
-      const query = genreRepository
+      const query = this.genreRepository
         .createQueryBuilder("genre")
         .select(["genre.id", "genre.name", "genre.slug"])
         .leftJoinAndSelect("genre.genrePic", "genrePic");
@@ -95,13 +95,13 @@ const GenreService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  update: async (req: Request) => {
+  async update(req: Request) {
     try {
       const { id } = req.params;
       const { name } = req?.body;
-      const genre = await genreRepository.findOneBy({ id });
+      const genre = await this.genreRepository.findOneBy({ id });
 
       if (!genre) {
         return {
@@ -111,7 +111,7 @@ const GenreService = {
         };
       } else {
         genre.name = name;
-        await genreRepository.save(genre);
+        await this.genreRepository.save(genre);
         return {
           code: STATUS_CODE.SUCCESS,
           status: true,
@@ -125,12 +125,12 @@ const GenreService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 
-  delete: async (req: Request) => {
+  async delete(req: Request) {
     try {
       const { id } = req.params;
-      const existingGenre = await genreRepository.findOneBy({ id });
+      const existingGenre = await this.genreRepository.findOneBy({ id });
       if (!existingGenre) {
         return {
           code: STATUS_CODE.NOT_FOUND,
@@ -138,7 +138,7 @@ const GenreService = {
           message: messages.errorMessages?.notFound,
         };
       }
-      const result = await genreRepository.delete(id);
+      const result = await this.genreRepository.delete(id);
       if (result) {
         return {
           code: STATUS_CODE.SUCCESS,
@@ -159,7 +159,7 @@ const GenreService = {
         message: messages.errorMessages?.serverError,
       };
     }
-  },
+  }
 };
 
-export default GenreService;
+export default new genreService();

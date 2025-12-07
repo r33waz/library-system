@@ -14,7 +14,7 @@ class LibraryDashboardService {
   private borrowRequestRepository = AppDataSource.getRepository(BorrowRequest);
   private authRepository = AppDataSource.getRepository(Auth);
 
-  // ✅ CENTRALIZED LIBRARY ID FETCH
+ 
   private async getLibraryId(authId: string) {
     const library = await this.authRepository
       .createQueryBuilder("auth")
