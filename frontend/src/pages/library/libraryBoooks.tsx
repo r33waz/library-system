@@ -2,7 +2,7 @@ import GenericSelect from "@/components/common/GenericSelect";
 import PaginationComp from "@/components/common/pagination";
 import SearchInput from "@/components/common/searchInput";
 import ThemeSwitch from "@/components/common/themeSwitch";
-import LibraryBookModal from "@/components/Library/LibraryBookModal";
+import LibraryBookModal from "@/components/Library/libraryBookModal";
 import { Button } from "@/components/ui/button";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { IBooks } from "@/interface/book.interface";
@@ -79,11 +79,11 @@ function LibraryBooks() {
       <div>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg">
+            <div className="p-3 bg-linear-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg">
               <Library className="h-8 w-8 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-500 to-indigo-700 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-linear-to-r from-blue-500 to-indigo-700 bg-clip-text text-transparent">
                 Library Dashboard
               </h1>
               <p className="dark:text-white text-black mt-1">
@@ -196,7 +196,7 @@ function LibraryBooks() {
                         className="w-full h-full object-cover rounded-xl shadow-lg"
                       />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
+                      <div className="w-full h-full bg-linear-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
                         <Book className="h-12 w-12 text-gray-400" />
                       </div>
                     )}
@@ -236,7 +236,7 @@ function LibraryBooks() {
           </>
         ) : (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-12 text-center shadow-lg border border-white/30">
-            <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-24 h-24 bg-linear-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
               <BookOpen className="h-12 w-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
@@ -250,7 +250,7 @@ function LibraryBooks() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg"
+                className="px-6 py-3 bg-linear-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-lg"
               >
                 Clear All Filters
               </button>

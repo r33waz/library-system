@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import LibrarySideBar from "./LibrarySideBar";
+import LibrarySideBar from "./librarySideBar";
 
 function LibraryLayout() {
   return (

@@ -180,7 +180,7 @@ function LibrarySideBar() {
       </div>
 
       {/* Menu Items */}
-      <nav className="flex flex-col gap-2 p-2 flex-grow">
+      <nav className="flex flex-col gap-2 p-2 grow">
         {menuItems
           .filter(
             (item) => !item.role || item.role === userDeatails?.library?.role

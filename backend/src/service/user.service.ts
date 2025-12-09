@@ -7,11 +7,11 @@ import { hashPassword } from "../helper/passwordHelper";
 import messages from "../utils/message";
 import { validatePagination } from "../utils/pegniation";
 
-const userRepository = AppDataSource.getRepository(User);
-const authRepository = AppDataSource.getRepository(Auth);
+class userService {
+  private userRepository = AppDataSource.getRepository(User);
+  private authRepository = AppDataSource.getRepository(Auth);
 
-const UserService = {
-  getAllUser: async (req: Request) => {
+  async getAllUser(req: Request) {
     const [page, perpage] = validatePagination(
       req.query.page as string,
       req.query.limit as string
@@ -19,7 +19,7 @@ const UserService = {
 
     const searchQuery = req.query.search;
 
-    const queryBuilder = userRepository
+    const queryBuilder = this.userRepository
       .createQueryBuilder("user")
       .leftJoin("user.auth", "auth")
       .leftJoin("user.profilepic", "profilepic")
@@ -51,11 +51,10 @@ const UserService = {
         });
     }
 
-    
-
-    const [user, count] = await queryBuilder.limit(perpage).offset((page - 1) * perpage).getManyAndCount();
-    console.log("🚀 ~ getAllUser: ~ user:", user.length)
-    console.log("🚀 ~ getAllUser: ~ count:", count)
+    const [user, count] = await queryBuilder
+      .limit(perpage)
+      .offset((page - 1) * perpage)
+      .getManyAndCount();
     // Return the result
     if (user.length > 0) {
       return {
@@ -76,12 +75,11 @@ const UserService = {
         // limit,
       };
     }
-  },
+  }
 
-  updateUser: async (req: Request) => {
+  async updateUser(req: Request) {
     try {
       const { id } = req.params;
-      console.log("🚀 ~ updateUser: ~ id :", id);
       const {
         email,
         password,
@@ -92,23 +90,11 @@ const UserService = {
         universityId,
         media,
       } = req.body;
-      console.log(
-        "🚀 ~ updateUser: ~       email",
-        firstname,
-        middlename,
-        lastname,
-        phoneNumber,
-        universityId,
-        media,
-        email,
-        password
-      );
 
-      const user = await userRepository.findOne({
+      const user = await this.userRepository.findOne({
         where: { id },
         relations: ["auth"],
       });
-      console.log("🚀 ~ updateUser: ~ user:", user);
       if (!user) {
         return {
           status: STATUS_CODE.NOT_FOUND,
@@ -117,7 +103,7 @@ const UserService = {
       }
 
       if (email && email !== user.auth.email) {
-        const existEmail = await authRepository.findOneBy({ email });
+        const existEmail = await this.authRepository.findOneBy({ email });
         if (existEmail) {
           return {
             status: STATUS_CODE.BAD_REQUEST,
@@ -128,7 +114,7 @@ const UserService = {
 
       // Only check if universityId is provided
       if (universityId && universityId !== user.universityId) {
-        const existUniversityId = await userRepository.findOneBy({
+        const existUniversityId = await this.userRepository.findOneBy({
           universityId,
         });
         if (existUniversityId) {
@@ -141,7 +127,7 @@ const UserService = {
 
       // Only check if phoneNumber is provided
       if (phoneNumber && phoneNumber !== user.phoneNumber) {
-        const existPhoneNumber = await userRepository.findOneBy({
+        const existPhoneNumber = await this.userRepository.findOneBy({
           phoneNumber,
         });
         if (existPhoneNumber) {
@@ -171,7 +157,7 @@ const UserService = {
           user.universityCard = media;
         }
       }
-      await userRepository.save(user);
+      await this.userRepository.save(user);
       return {
         status: STATUS_CODE.SUCCESS,
         message: messages?.successMessages?.user?.update,
@@ -183,7 +169,7 @@ const UserService = {
         message: messages?.errorMessages?.serverError,
       };
     }
-  },
-};
+  }
+}
 
-export default UserService;
+export default new userService();

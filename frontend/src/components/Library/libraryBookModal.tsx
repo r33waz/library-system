@@ -39,7 +39,7 @@ const LibraryBookModal = ({
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-2 sm:p-4">
           {/* Close button positioned relative to the backdrop, not the modal content */}
-          <div className="absolute top-4 right-4 z-[60]">
+          <div className="absolute top-4 right-4 z-60">
             <button
               onClick={() => setShowModal(false)}
               className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-md"
@@ -61,7 +61,7 @@ const LibraryBookModal = ({
             ) : singleBook ? (
               <div className="flex-1 flex flex-col lg:flex-row overflow-y-auto">
                 {/* Book Cover Section */}
-                <div className="dark:bg-dark-secondary bg-white p-6 lg:p-8 flex justify-center lg:justify-start items-start lg:w-80 flex-shrink-0">
+                <div className="dark:bg-dark-secondary bg-white p-6 lg:p-8 flex justify-center lg:justify-start items-start lg:w-80 shrink-0">
                   <div className="text-center lg:text-left">
                     <div
                       className="w-96 h-96 lg:w-72 lg:h-[600px] rounded-xl shadow-2xl mx-auto lg:mx-0 flex items-center justify-center text-white font-bold overflow-hidden transform hover:scale-105 transition-transform duration-300"
@@ -129,7 +129,7 @@ const LibraryBookModal = ({
                             {singleBook.genre.map((g) => (
                               <span
                                 key={g.id}
-                                className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+                                className="px-3 py-1.5 bg-linear-to-r from-blue-500 to-blue-600 text-white rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
                               >
                                 {g.name}
                               </span>
@@ -149,7 +149,7 @@ const LibraryBookModal = ({
                               {singleBook.category.map((c) => (
                                 <span
                                   key={c.id}
-                                  className="px-3 py-1.5 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
+                                  className="px-3 py-1.5 bg-linear-to-r from-purple-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-shadow"
                                 >
                                   {c.name}
                                 </span>
@@ -160,7 +160,7 @@ const LibraryBookModal = ({
 
                       {/* Library Info */}
                       {singleBook.library && (
-                        <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                        <div className="bg-linear-to-r from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
                           <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wide mb-3 flex items-center">
                             <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                             Library Information
@@ -225,7 +225,7 @@ const LibraryBookModal = ({
                           onClick={() =>
                             window.open(singleBook.videoUrlNeplai, "_blank")
                           }
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                          className="bg-linear-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                         >
                           🇳🇵 Nepali
                         </Button>
@@ -235,7 +235,7 @@ const LibraryBookModal = ({
                           onClick={() =>
                             window.open(singleBook.videoUrlEnglish, "_blank")
                           }
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                          className="bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                         >
                           🇺🇸 English
                         </Button>
@@ -245,7 +245,7 @@ const LibraryBookModal = ({
                           onClick={() =>
                             window.open(singleBook.videoUrlHindi, "_blank")
                           }
-                          className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                          className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                         >
                           🇮🇳 Hindi
                         </Button>
@@ -255,7 +255,7 @@ const LibraryBookModal = ({
                 </div>
               </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="flex-1 flex items-center justify-center bg-linear-to-r from-gray-50 to-gray-100">
                 <div className="text-center">
                   <BookOpen size={64} className="text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 font-medium">

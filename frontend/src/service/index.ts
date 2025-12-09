@@ -16,7 +16,7 @@ const MainApiInstance = (
   instance.interceptors.response.use(
     (response) => {
       // Show a toast for success responses (if it's a POST, PUT, DELETE request)
-      if (["post", "patch", "delete"].includes(response.config.method || "")) {
+      if (["post", "patch", "delete","put"].includes(response.config.method || "")) {
         SuccessToast(response.data?.message);
       }
       return response;
@@ -37,7 +37,7 @@ const MainApiInstance = (
     const method = config.method?.toLowerCase();
   
     // Only fetch CSRF token for unsafe HTTP methods
-    const needsCsrf = ["post", "patch", "delete"].includes(method || "");
+    const needsCsrf = ["post", "patch", "delete","put"].includes(method || "");
   
     if (needsCsrf && !cachedCsrfToken) {
       try {

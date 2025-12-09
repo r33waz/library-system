@@ -14,7 +14,6 @@ class LibraryDashboardService {
   private borrowRequestRepository = AppDataSource.getRepository(BorrowRequest);
   private authRepository = AppDataSource.getRepository(Auth);
 
- 
   private async getLibraryId(authId: string) {
     const library = await this.authRepository
       .createQueryBuilder("auth")
@@ -62,20 +61,17 @@ class LibraryDashboardService {
         where: whereDateRange,
       });
 
-      const pendingBorrowRequests =
-        await this.borrowRequestRepository.count({
-          where: { ...whereDateRange, status: BORROWER_STATUS.PENDING },
-        });
+      const pendingBorrowRequests = await this.borrowRequestRepository.count({
+        where: { ...whereDateRange, status: BORROWER_STATUS.PENDING },
+      });
 
-      const acceptedBorrowRequests =
-        await this.borrowRequestRepository.count({
-          where: { ...whereDateRange, status: BORROWER_STATUS.BORROWED },
-        });
+      const acceptedBorrowRequests = await this.borrowRequestRepository.count({
+        where: { ...whereDateRange, status: BORROWER_STATUS.BORROWED },
+      });
 
-      const overdueBorrowRequests =
-        await this.borrowRequestRepository.count({
-          where: { ...whereDateRange, status: BORROWER_STATUS.OVERDUE },
-        });
+      const overdueBorrowRequests = await this.borrowRequestRepository.count({
+        where: { ...whereDateRange, status: BORROWER_STATUS.OVERDUE },
+      });
 
       return {
         code: STATUS_CODE.SUCCESS,
@@ -114,9 +110,9 @@ class LibraryDashboardService {
         };
       }
 
-      const redisKey = `libraryBorrowerStast:${libraryId}:${fromDate ?? "all"}:${
-        toDate ?? "all"
-      }`;
+      const redisKey = `libraryBorrowerStast:${libraryId}:${
+        fromDate ?? "all"
+      }:${toDate ?? "all"}`;
 
       const cached = await getFromCache(redisKey);
       if (cached) {

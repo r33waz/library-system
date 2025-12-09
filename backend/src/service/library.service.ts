@@ -11,7 +11,7 @@ import runInTransaction from "../utils/transaction";
 
 class LibraryService {
   private libraryRepository = AppDataSource.getRepository(Library);
-  private authRepository = AppDataSource.getRepository(Auth);
+  // private authRepository = AppDataSource.getRepository(Auth);
   private libraryEmpRepository = AppDataSource.getRepository(LibraryEmp);
   private mediaRepository = AppDataSource.getRepository(Media);
 
