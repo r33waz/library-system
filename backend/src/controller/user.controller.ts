@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import UserService from "../service/user.service";
+import userService from "../service/user.service";
 
-const UserController = {
-  getAllUsers: async (req: Request, res: Response) => {
-    const result = await UserService.getAllUser(req);
+class userController{
+  async getAllUsers(req: Request, res: Response) {
+    const result = await userService.getAllUser(req);
     res?.status(result?.status).json({
       status: result?.status,
       message: result?.message,
@@ -12,15 +12,15 @@ const UserController = {
       // limit: result?.limit,
       total: result?.totalCount,
     });
-  },
+  }
 
-  update: async (req: Request, res: Response) => {
-    const result = await UserService?.updateUser(req);
+  async update(req: Request, res: Response) {
+    const result = await userService?.updateUser(req);
     res?.status(result?.status).json({
       status: result?.status,
       message: result?.message,
     });
-  },
+  }
 };
 
-export default UserController;
+export default new userController();

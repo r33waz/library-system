@@ -77,7 +77,7 @@ export const ImagePreview: React.FC<ImagePreviewProps> = ({
         )}
       </label>
 
-      {(previewUrl || defaultImage) && (
+      {(previewUrl ) && (
         <div
           className="absolute top-0 right-0 cursor-pointer text-red-500 bg-white rounded-full p-0.5 shadow"
           onClick={() => setFile(null)}

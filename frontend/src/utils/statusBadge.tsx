@@ -68,7 +68,7 @@ const BorrowStatusBadge = ({ status }: { status: string }) => {
 
     case BORROWER_STATUS.RETURNED:
       return (
-        <span className="bg-error-red text-white rounded-full text-xs px-2 py-1">
+        <span className="bg-orange-400 text-white rounded-full text-xs px-2 py-1">
           RETURNED
         </span>
       );

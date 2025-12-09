@@ -15,7 +15,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
 
   synchronize: !isProduction, // true in dev, false in prod
-  logging: !isProduction, // true in dev, false in prod
+  // logging: !isProduction, // true in dev, false in prod
 
   entities: [__dirname + "/../entities/*{.ts,.js}"],
   migrations: [__dirname + "/../migrations/*{.ts,.js}"],
