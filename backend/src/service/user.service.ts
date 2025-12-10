@@ -11,6 +11,10 @@ class userService {
   private userRepository = AppDataSource.getRepository(User);
   private authRepository = AppDataSource.getRepository(Auth);
 
+  getSingleUser(req: Request) {
+    const { id } = req.params;
+
+  }
   async getAllUser(req: Request) {
     const [page, perpage] = validatePagination(
       req.query.page as string,

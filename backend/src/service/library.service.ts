@@ -6,12 +6,13 @@ import Library from "../entities/library.entity";
 import { LibraryEmp } from "../entities/libraryEmp.entity";
 import Media from "../entities/media.entity";
 import { hashPassword } from "../helper/passwordHelper";
+import { AuthenticatedRequest } from "../interface/auth.Interface";
 import messages from "../utils/message";
 import runInTransaction from "../utils/transaction";
 
 class LibraryService {
   private libraryRepository = AppDataSource.getRepository(Library);
-  // private authRepository = AppDataSource.getRepository(Auth);
+  private authRepository = AppDataSource.getRepository(Auth);
   private libraryEmpRepository = AppDataSource.getRepository(LibraryEmp);
   private mediaRepository = AppDataSource.getRepository(Media);
 
@@ -129,62 +130,62 @@ class LibraryService {
     }
   }
 
-  // async getAllEmployees(req: AuthenticatedRequest) {
-  //   const authId = req.user.id; // Get the authId from the authenticated user
+  async getAllEmployees(req: AuthenticatedRequest) {
+    const authId = req.user.id; // Get the authId from the authenticated user
 
-  //   try {
-  //     const queryBuilder = await this.authRepository
-  //       .createQueryBuilder("auth")
-  //       .leftJoinAndSelect("auth.library", "library") // Left join to get the related library entity
-  //       .where("auth.id = :authId", { authId }) // Filter by the given authId
-  //       .getOne(); // Fetch the record for the given authId
+    try {
+      const queryBuilder = await this.authRepository
+        .createQueryBuilder("auth")
+        .leftJoinAndSelect("auth.library", "library") // Left join to get the related library entity
+        .where("auth.id = :authId", { authId }) // Filter by the given authId
+        .getOne(); // Fetch the record for the given authId
 
-  //     if (!queryBuilder || !queryBuilder.library) {
-  //       return {
-  //         code: STATUS_CODE.NOT_FOUND,
-  //         status: false,
-  //         message: "Library not found for this authId.",
-  //       };
-  //     }
+      if (!queryBuilder || !queryBuilder.library) {
+        return {
+          code: STATUS_CODE.NOT_FOUND,
+          status: false,
+          message: "Library not found for this authId.",
+        };
+      }
 
-  //     // Use the libraryId from the retrieved library to get the employees
-  //     const libraryId = queryBuilder.library.id;
+      // Use the libraryId from the retrieved library to get the employees
+      const libraryId = queryBuilder.library.id;
 
-  //     // Fetch all employees associated with this libraryId
-  //     const employees = await this.libraryEmpRepository
-  //       .createQueryBuilder("libraryEmp")
-  //       .leftJoin("libraryEmp.auth", "auth") // Join the related 'auth' entity
-  //       .leftJoin("libraryEmp.employeePic", "media") // Join the related 'media' entity
-  //       .select([
-  //         "libraryEmp.id",
-  //         "libraryEmp.firstname",
-  //         "libraryEmp.lastname",
-  //         "libraryEmp.middlename",
-  //         "libraryEmp.phoneNumber",
-  //         "libraryEmp.status",
-  //         "libraryEmp.role",
-  //         "libraryEmp.blocked",
-  //         "auth.email", // Explicitly add the auth.email field to the selection
-  //         "media.path",
-  //         "media.type",
-  //         "media.name",
-  //       ]) // Add 'email' from the 'auth' entity
-  //       .where("libraryEmp.libraryId = :libraryId", { libraryId }) // Filter by libraryId
-  //       .getMany();
-  //     console.log("🚀 ~ getAllEmployees: ~ employees:", employees);
-  //     return {
-  //       code: STATUS_CODE.SUCCESS,
-  //       status: false,
-  //       data: employees,
-  //     };
-  //   } catch (error) {
-  //     return {
-  //       code: STATUS_CODE.INTERNAL_SERVER_ERROR,
-  //       status: false,
-  //       message: "Something went wrong while fetching employees.",
-  //     };
-  //   }
-  // }
+      // Fetch all employees associated with this libraryId
+      const employees = await this.libraryEmpRepository
+        .createQueryBuilder("libraryEmp")
+        .leftJoin("libraryEmp.auth", "auth") // Join the related 'auth' entity
+        .leftJoin("libraryEmp.employeePic", "media") // Join the related 'media' entity
+        .select([
+          "libraryEmp.id",
+          "libraryEmp.firstname",
+          "libraryEmp.lastname",
+          "libraryEmp.middlename",
+          "libraryEmp.phoneNumber",
+          "libraryEmp.status",
+          "libraryEmp.role",
+          "libraryEmp.blocked",
+          "auth.email", // Explicitly add the auth.email field to the selection
+          "media.path",
+          "media.type",
+          "media.name",
+        ]) // Add 'email' from the 'auth' entity
+        .where("libraryEmp.libraryId = :libraryId", { libraryId }) // Filter by libraryId
+        .getMany();
+      console.log("🚀 ~ getAllEmployees: ~ employees:", employees);
+      return {
+        code: STATUS_CODE.SUCCESS,
+        status: false,
+        data: employees,
+      };
+    } catch (error) {
+      return {
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+        status: false,
+        message: "Something went wrong while fetching employees.",
+      };
+    }
+  }
 
   async getOneEmp(req: Request) {
     try {
