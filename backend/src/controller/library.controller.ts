@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { AuthenticatedRequest } from "../interface/auth.Interface";
 import libraryService from "../service/library.service";
 import { sendResponse } from "../utils/responseHandler";
 
@@ -12,16 +13,16 @@ class LibraryController {
     });
   }
 
-  // async getAll(req: Request, res: Response) {
-  //   const result = await libraryService.getAllEmployees(
-  //     req as AuthenticatedRequest
-  //   );
-  //   sendResponse(res, {
-  //     status: result?.status,
-  //     data: result?.data,
-  //     httpCode: result?.code,
-  //   });
-  // }
+  async getAllEmployee(req: Request, res: Response) {
+    const result = await libraryService.getAllEmployees(
+      req as AuthenticatedRequest
+    );
+    sendResponse(res, {
+      status: result?.status,
+      data: result?.data,
+      httpCode: result?.code,
+    });
+  }
 
   async getOne(req: Request, res: Response) {
     const result = await libraryService.getOne(req);

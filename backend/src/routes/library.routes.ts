@@ -10,15 +10,13 @@ const router = express.Router();
 router.get("/:id", libraryController.getOne);
 router.use(authenticateUser);
 router.use(authorizeUser([ROLES.SUDO_ADMIN, ROLES.LIBRARY_ADMIN]));
-
-// router.get("/library/:id"); // Fix: add missing handler if needed
 router.post(
   "/create-employee",
   validateDto(LibraryEmpDto),
   verifyCsrf,
   libraryController.create
 );
-// router.get("/getAll-employee", libraryController.getAll);
+router.get("/getAll-employee", libraryController.getAllEmployee);
 
 router.patch("/update-library/:id", libraryController.update);
 
