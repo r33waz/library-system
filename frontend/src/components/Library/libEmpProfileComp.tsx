@@ -50,7 +50,6 @@ function libEmpProfileComp({ id }: { id: string }) {
       city: library?.city,
       state: library?.state,
       street: library?.street,
-      // address: library?.address,
     });
   }, [library]);
   const onSubmit = async (data: Partial<ILibraryInterface>) => {
