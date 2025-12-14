@@ -1,22 +1,27 @@
-# Use Node 23 Alpine for dev
-FROM node:23-alpine AS prod
+# ================================
+# Use Node 23 Alpine as base image
+# Lightweight Node image, good for development
+# ================================
+FROM node:23-alpine AS dev
 
-# Set working directory
+# Set working directory inside container
 WORKDIR /app
 
-# Copy package files
+# Copy package.json and package-lock.json to install dependencies
 COPY package.json package-lock.json ./
 
 # Install dependencies
 RUN npm install
+
+# Install development tools globally (not recommended in prod)
 RUN npm install -g nodemon ts-node typescript
 
-# Copy backend source code
+# Copy all backend source code
 COPY . .
 
-# Expose backend port for testing
+# Expose port 8000 (backend API)
 EXPOSE 8000
 
-# Start the backend using nodemon + ts-node
+# Start backend in development mode with hot-reloading
+# nodemon watches for changes in .ts and .json files
 CMD ["nodemon", "--watch", ".", "--ext", "ts,json", "--exec", "ts-node", "src/server.ts"]
-

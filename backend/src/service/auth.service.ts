@@ -84,7 +84,7 @@ class AuthService {
         role,
       });
 
-      await this.authRepository.save(user);
+      // await this.authRepository.save(user);
 
       // Store the tokens in cookies
       response.cookie("accessToken", accessToken, {
