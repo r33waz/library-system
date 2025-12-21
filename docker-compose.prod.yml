@@ -1,38 +1,27 @@
-version: "3.8"
-
 services:
   frontend:
-    image: r33waz/library-frontend:v3
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile.prod
     ports:
-      - "80:80"         # Production port
+      - "3000:3000"         # Production port for serve
     depends_on:
       - backend
     restart: always
 
   backend:
-    image: r33waz/library-backend:v3
-    ports:
-      - "8000:8000"
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile.prod
+    network_mode: host
     env_file:
-      - ./backend.env
-    depends_on:
-      - postgres
-      - redis
+      - ./backend/.env
+    # depends_on:
+    #   - redis
     restart: always
 
-  postgres:
-    image: postgres:alpine
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: yourdb
-      POSTGRES_USER: youruser
-      POSTGRES_PASSWORD: yourpassword
-    restart: always
-
-  redis:
-    image: redis:alpine
-    restart: always
-
-volumes:
-  pgdata:
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: always

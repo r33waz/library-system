@@ -8,7 +8,7 @@ import os from "os";
 import path from "path";
 import "reflect-metadata";
 import AppDataSource from "./config/db.config";
-import { csrfProtection, setCsrfCookie } from "./middleware/crsf.middleware";
+import { csrfProtection } from "./middleware/crsf.middleware";
 import mainRouter from "./routes/mainRoute";
 import "./utils/crons/overdueCheck.cron";
 import redisClient from "./utils/redisClient";
@@ -42,7 +42,6 @@ if (isProd && cluster.isPrimary) {
       );
 
       app.use(cookieParser());
-      app.use(setCsrfCookie);
       app.use(csrfProtection);
 
       app.use(express.json());
@@ -62,7 +61,9 @@ if (isProd && cluster.isPrimary) {
       const port = process.env.PORT || 8080;
       app.listen(port, () =>
         console.log(
-          `Worker ${process.pid} running in ${isProd ? "PROD" : "DEV"} on port ${port}`
+          `Worker ${process.pid} running in ${
+            isProd ? "PROD" : "DEV"
+          } on port ${port}`
         )
       );
     } catch (error) {

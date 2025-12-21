@@ -24,6 +24,18 @@ class LibraryEmpDto {
   @IsOptional()
   middlename: string;
 
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @IsNotEmpty()
+  @IsString()
+  city: string;
+
+  @IsNotEmpty()
+  @IsString()
+  street: string;
+
   @IsString()
   @IsNotEmpty()
   lastname: string;

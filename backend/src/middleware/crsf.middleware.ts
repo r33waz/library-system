@@ -3,12 +3,6 @@ import "dotenv/config";
 import { NextFunction, Request, Response } from "express";
 import messages from "../utils/message";
 
-function generateSecret(): string {
-  const randomData = crypto.randomBytes(64).toString("hex"); // Base random data
-  const timestamp = Date.now().toString(); // Current timestamp for extra entropy
-  const complexSecret = randomData + timestamp;
-  return complexSecret;
-}
 
 // Creates a token by hashing the complex secret with a salt and additional layers
 export function createToken(secret: string): string {
@@ -19,18 +13,6 @@ export function createToken(secret: string): string {
     .digest("hex");
 }
 
-
-export function setCsrfCookie(req: Request, res: Response, next: NextFunction) {
-  if (!req.cookies.csrfSecret) {
-    const secret = generateSecret();
-    res.cookie("csrfSecret", secret, {
-      httpOnly: false,
-      secure: false,
-      sameSite: "lax",
-    });
-  }
-  next();
-}
 
 export function verifyCsrf(
   req: Request,
@@ -65,6 +47,7 @@ export function csrfProtection(
   if (
     req.path === "/api/v1/auth/login" ||
     req.path === "/api/v1/auth/signup" ||
+    req.path === "/api/v1/auth/verifyOtp" ||
     req.path === "/api/v1/auth/logout" ||
     req.path === "/api/v1/auth/google-login"
   ) {

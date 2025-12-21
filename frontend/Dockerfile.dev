@@ -1,5 +1,5 @@
 # Use Node.js for development
-FROM node:23-alpine AS development
+FROM node:25-alpine3.22 AS development
 
 # Set working directory
 WORKDIR /app
@@ -9,8 +9,6 @@ COPY package*.json ./
 
 # Install dependencies
 RUN npm install 
-
-# #Build the application
 
 # Copy the rest of the application
 COPY . .

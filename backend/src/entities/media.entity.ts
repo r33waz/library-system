@@ -23,6 +23,7 @@ export class Media extends BaseEntity {
   @Column({ type: "enum", enum: MEDIA_TYPE, default: null })
   mediaType: string;
 
+  // book cover image
   @OneToOne(() => Book, (book) => book.coverImage, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -31,6 +32,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "bookCoverImageId" })
   bookCoverImage: Book;
 
+  // user profile pic
   @OneToOne(() => User, (user) => user.profilepic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -39,6 +41,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "profileId" })
   profilepic: User;
 
+  // user university card
   @OneToOne(() => User, (user) => user.universityCard, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -47,6 +50,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "universityCardId" })
   universityCard: User;
 
+  // library admin profile pics
   @OneToOne(() => Admin, (admin) => admin.profilepic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -55,6 +59,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "adminProfileId" })
   adminProfile: Admin;
 
+  // library profile pic
   @OneToOne(() => Library, (library) => library.profilepic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -63,6 +68,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "libraryProfileId" })
   libraryProfile: Library;
 
+  // library user profile pics
   @OneToOne(() => LibraryEmp, (library) => library.employeePic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -71,6 +77,25 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "employeePicId" })
   employeePic: LibraryEmp;
 
+  // library user pan
+  @OneToOne(() => LibraryEmp, (library) => library.employeePan, {
+    onDelete: "CASCADE",
+    orphanedRowAction: "delete",
+    nullable: true,
+  })
+  @JoinColumn({ name: "employeePanId" })
+  employeePan: LibraryEmp;
+
+  // library user citizenship
+  @OneToOne(() => LibraryEmp, (library) => library.employeeCitizenship, {
+    onDelete: "CASCADE",
+    orphanedRowAction: "delete",
+    nullable: true,
+  })
+  @JoinColumn({ name: "employeeCitizenshipId" })
+  employeeCitizenship: LibraryEmp;
+
+  // genre pic
   @OneToOne(() => Genre, (genre) => genre.genrePic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",
@@ -79,6 +104,7 @@ export class Media extends BaseEntity {
   @JoinColumn({ name: "genreId" })
   genrePic: Genre;
 
+  // category pic
   @OneToOne(() => Category, (genre) => genre.categoryPic, {
     onDelete: "CASCADE",
     orphanedRowAction: "delete",

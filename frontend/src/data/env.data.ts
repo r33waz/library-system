@@ -72,6 +72,9 @@ const endPoints = {
   },
 
   getLibraryBorrowStats: `api/v1/library-dashboard/borrower-stats`,
+  //for library employee
+  getSingleLibraryEmp: (id: string) => `api/v1/libraryEmp/${id}`,
+
   // wishlist
   toggleWishList: "/api/v1/wishlist/add",
   getWishListById: (id: string) => `/api/v1/wishlist/${id}`,

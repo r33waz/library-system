@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, OneToOne } from "typeorm";
 import BaseEntity from "../constant/base.entity";
-import { BLOCK_STATUS, ROLES, SIGNUPSTATUS } from "../constant/enum";
+import { ROLES } from "../constant/enum";
 import { Auth } from "./auth.enity";
 import { Bill } from "./bill.entity";
 import Book from "./book.entity";
@@ -36,28 +36,12 @@ export class Library extends BaseEntity {
   profilepic: Media;
 
   @Column({
-    name: "status",
-    type: "enum",
-    enum: SIGNUPSTATUS,
-    default: SIGNUPSTATUS.PENDING,
-  })
-  status: SIGNUPSTATUS;
-
-  @Column({
     name: "role",
     type: "enum",
     enum: ROLES,
     default: ROLES.LIBRARY_ADMIN,
   })
   role: ROLES;
-
-  @Column({
-    name: "blocked",
-    type: "enum",
-    enum: BLOCK_STATUS,
-    default: BLOCK_STATUS.ACTIVE,
-  })
-  blocked: BLOCK_STATUS;
 
   @OneToMany(() => Book, (book) => book.library, { cascade: true })
   books: Book[];

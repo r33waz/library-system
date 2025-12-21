@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { ROLES, STATUS_CODE } from "../constant/enum";
 import { verifyToken } from "../helper/genToken";
+import messages from "../utils/message";
 
 export const authenticateUser = async (
   req: Request,
@@ -13,6 +14,7 @@ export const authenticateUser = async (
     if (!token) {
       res.status(STATUS_CODE.UNAUTHORIZED).json({
         status: STATUS_CODE.UNAUTHORIZED,
+        messages: messages?.errorMessages?.invalidTokens,
       });
       return;
     }
@@ -25,6 +27,7 @@ export const authenticateUser = async (
     } catch (error) {
       res.status(STATUS_CODE.SESSION_EXPIRED).json({ 
         status: STATUS_CODE.SESSION_EXPIRED,
+        messages: messages?.errorMessages?.invalidTokens,
       });
     }
   } catch (error) {
@@ -40,7 +43,7 @@ export const authorizeUser = (roles: ROLES[]) => {
     const user = (req as any).user;
 
     if (!user) {
-      res.status(401).json({ message: "Unauthorized - No user found" });
+      res.status(STATUS_CODE.UNAUTHORIZED).json({ message: "Unauthorized - No user found" });
       return;
     }
 
@@ -48,6 +51,6 @@ export const authorizeUser = (roles: ROLES[]) => {
       return next();
     }
 
-    res.status(403).json({ message: "Forbidden - Insufficient permissions" });
+    res.status(STATUS_CODE?.FORBIDDEN).json({ message: messages?.errorMessages?.forbidden });
   };
 };

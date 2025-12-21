@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MEDIA_TYPE, ROLES } from "@/data/enum";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
-import { ILibraryInterface } from "@/interface/library.interface";
+import { ILibraryEmpInterface } from "@/interface/library.interface";
 import { getSingleLibrary, updateLibrary } from "@/rtk/thunk/library.thunk";
 import { LibraryUpdateSchema } from "@/utils/formschema";
 import { useMentTags } from "@/utils/metaTags";
@@ -24,7 +24,7 @@ function libProfileComp({ id }: { id: string }) {
 
   const { library } = useAppSelector((state) => state.library);
 
-  const { register, handleSubmit, reset } = useForm<ILibraryInterface>({
+  const { register, handleSubmit, reset } = useForm<ILibraryEmpInterface>({
     resolver: yupResolver(LibraryUpdateSchema),
     defaultValues: {
       name: library?.name,
@@ -53,7 +53,7 @@ function libProfileComp({ id }: { id: string }) {
       // address: library?.address,
     });
   }, [library]);
-  const onSubmit = async (data: Partial<ILibraryInterface>) => {
+  const onSubmit = async (data: Partial<ILibraryEmpInterface>) => {
     try {
       let result;
 
@@ -74,7 +74,7 @@ function libProfileComp({ id }: { id: string }) {
       await dispatch(
         updateLibrary({
           id: id as string,
-          data: updatedData as ILibraryInterface,
+          data: updatedData as ILibraryEmpInterface,
         })
       ).unwrap();
 

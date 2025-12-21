@@ -12,7 +12,7 @@ const LoginPage = lazy(() => import("./pages/auth/login"));
 const RegisterPage = lazy(() => import("./pages/auth/register"));
 const LibraryDashboard = lazy(() => import("./pages/library/libDashboard"));
 const LibProfile = lazy(() => import("./pages/library/libProfile"));
-const LibraryEmpProfile = lazy(() => import("./pages/library/libraryEmpProfile"));
+// const LibraryEmpProfile = lazy(() => import("./pages/library/libraryEmpProfile"));
 const LibraryBoooks = lazy(() => import("./pages/library/libraryBoooks"));
 const AboutPage = lazy(() => import("./pages/user/about"));
 const BooksPage = lazy(() => import("./pages/user/books"));
@@ -74,7 +74,7 @@ function App() {
         >
           <Route path="dashboard" element={<LibraryDashboard />} />
           <Route path="profile/:id" element={<LibProfile />} />
-          <Route path="employee/profile/:id" element={<LibraryEmpProfile />} />
+          {/* <Route path="employee/profile/:id" element={<LibraryEmpProfile />} /> */}
           <Route path="employees" element={<LibraryDashboard />} />
           <Route path="borrow" element={<LibraryDashboard />} />
           <Route path="borrow-requests" element={<LibraryDashboard />} />
