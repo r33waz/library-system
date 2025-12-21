@@ -26,6 +26,15 @@ class AuthController {
     });
   }
 
+  async verifyOtp(req: Request, res: Response): Promise<void> {
+    const result = await authService.verifyOtp(req);
+    sendResponse(res, {
+      status: result?.status,
+      httpCode: result?.code,
+      message: result?.message,
+    });
+  }
+
   // Signup handler
   async signup(req: Request, res: Response): Promise<void> {
     const result = await authService.signUpService(req);

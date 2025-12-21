@@ -4,12 +4,12 @@ import nodemailer from "nodemailer";
 const sendMail = async (email: string[], subject: string, message: string) => { // ✅ Fix: Define email as string[]
   try {
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIl_HOST,
-      port: Number(process.env.EMAIL_PORT),
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
       secure: false,
       auth: {
-        user: process.env.USER_NAME,
-        pass: process.env.PASSWORD,
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
       },
     });
 
@@ -18,7 +18,7 @@ const sendMail = async (email: string[], subject: string, message: string) => { 
         console.log(error);
       } else {
         const mailOptions = {
-          from: process.env.USER_NAME,
+          from: process.env.SMTP_FROM,
           to: email.join(", "), 
           subject: subject,
           html: message,

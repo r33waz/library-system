@@ -124,21 +124,12 @@ function LibrarySideBar() {
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex gap-3 items-center px-4 hover:bg-gray-1 dark:hover:bg-dark-primary">
           <User size={20} className="dark:text-white" />
-          {userDeatails?.role === ROLES?.LIBRARY_ADMIN ? (
-            <Link
-              className="text-sm w-full"
-              to={`/library/profile/${userDeatails?.library?.id}`}
-            >
-              Profile
-            </Link>
-          ) : (
-            <Link
-              className="text-sm w-full"
-              to={`employee/profile/${userDeatails?.libraryEmp?.id}`}
-            >
-              Profile
-            </Link>
-          )}
+          <Link
+            className="text-sm w-full"
+            to={`/library/profile/${userDeatails?.library?.id ?? userDeatails?.libraryEmp?.id}`}
+          >
+            Profile
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem className="flex gap-1 items-center hover:bg-gray-1 dark:hover:bg-dark-primary">

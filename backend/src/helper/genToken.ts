@@ -4,8 +4,9 @@ import { JwtPayloadWithId } from "../interface/auth.Interface";
 
 const accessToken = process.env.ACCESS_TOKEN ;
 const refreshToken = process.env.REFRESH_TOKEN ;
+const csrfToken = process.env.CSRF_TOKEN ;
 
-if (!accessToken || !refreshToken) {
+if (!accessToken || !refreshToken || !csrfToken) {
   throw new Error("ACCESS_TOKEN environment variable is not set");
 }
 
@@ -19,6 +20,14 @@ export const genAccessToken = (payload: Object) => {
 
 export const genRefreshToken = (payload: Object) => {
   const token = jwt.sign(payload, refreshToken, {
+    expiresIn: "7d",
+  });
+
+  return token;
+};
+
+export const gencsrfToken = (payload: Object) => {
+  const token = jwt.sign(payload, csrfToken, {
     expiresIn: "7d",
   });
 

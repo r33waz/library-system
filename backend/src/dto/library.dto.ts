@@ -36,15 +36,15 @@ class LibraryDto {
   @IsString()
   address: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   city: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   street: string;
 
-  @IsEmpty()
+  @IsNotEmpty()
   @IsString()
   state: string;
 

@@ -88,6 +88,7 @@ const messages = {
       read: "Notification marked as read.",
       deleted: "Notification deleted successfully.",
     },
+    emailVerificationDone: "Email verification is  completed.",
   },
   errorMessages: {
     book: {
@@ -105,6 +106,8 @@ const messages = {
       "University ID already exists. Please choose a different ID.",
     emailNotFound: "Email not found. Please check your email address.",
     emailVerified: "Email is already verified. Please log in.",
+    emailVefificationFailed: "Email verification failed. Please try again.",
+
     emailNotVerified: "Email is not verified. Please verify your email.",
     emailVerificationExpired: "Email verification link has expired.",
     validationError: "Invalid input. Please check your data.",
@@ -124,8 +127,11 @@ const messages = {
     authenticationFailed: "Invalid email or password.",
     accountLocked: "Account is locked due to multiple failed attempts.",
     accountBlocked: "Account is blocked. Please contact support.",
+    accountAlreadyActive: "Account is already active.",
     actionNotAllowed: "This action is not allowed.",
     dependencyError: "Operation failed due to dependent records.",
+    invalidCsrfToken: "Invalid CSRF token.",
+    invalidTokens: "Invalid tokens provided.",
   },
 };
 

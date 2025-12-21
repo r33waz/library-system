@@ -36,7 +36,47 @@ export interface ILibraryData {
   updatedAt: string;
 }
 
+export interface ILibraryEmployee {
+  id: string;
+  name: string;
+  description: string;
+  phoneNumber: string;
+  status: string;
+  blocked: string;
+  street: string;
+  city: string;
+  state: string;
+  role: string;
+  auth: {
+    email: string;
+  };
+  profilepic: {
+    id: string;
+    name: string;
+    path: string;
+  };
+  media: {
+    id: string;
+    path: string;
+    mediaType: string;
+    type: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ILibraryInterface {
+  name: string;
+  description: string;
+  phoneNumber: string;
+  media?: string;
+  email: string;
+  street: string;
+  city: string;
+  state: string;
+}
+
+export interface ILibraryEmpInterface {
   name: string;
   description: string;
   phoneNumber: string;
@@ -55,7 +95,7 @@ export interface ILibraryStats {
   totalOverdue: number;
 }
 
-export interface ILibraryBorrowStats{
+export interface ILibraryBorrowStats {
   date: string;
   count: number;
 }

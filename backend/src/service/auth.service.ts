@@ -4,16 +4,23 @@ import AppDataSource from "../config/db.config";
 import firebaseAdmin from "../config/firebaseConfig";
 import { BLOCK_STATUS, STATUS_CODE } from "../constant/enum";
 import { Auth } from "../entities/auth.enity";
+import { AuthOtp } from "../entities/otp.entity";
 import User from "../entities/user.entity";
+import { generateOtp, otpExpiry } from "../helper/genOtp";
 import { genAccessToken, genRefreshToken } from "../helper/genToken";
 import { comparePassword, hashPassword } from "../helper/passwordHelper";
-import { AuthenticatedRequest, ILogin } from "../interface/auth.Interface";
+import {
+  AuthenticatedRequest,
+  ILogin,
+  OtpEmailParams,
+} from "../interface/auth.Interface";
 import { createToken } from "../middleware/crsf.middleware";
 import messages from "../utils/message";
 import sendMail from "../utils/sendMail";
 
 class AuthService {
   private authRepository = AppDataSource.getRepository(Auth);
+  private otpRepository = AppDataSource.getRepository(AuthOtp);
 
   async login(body: ILogin, response: Response) {
     try {
@@ -44,11 +51,7 @@ class AuthService {
         };
       }
 
-      if (
-        user?.library?.blocked === BLOCK_STATUS.BLOCKED ||
-        user?.user?.blocked === BLOCK_STATUS.BLOCKED ||
-        user?.libraryEmp?.blocked === BLOCK_STATUS.BLOCKED
-      ) {
+      if (user?.blocked === BLOCK_STATUS.BLOCKED) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
@@ -84,7 +87,7 @@ class AuthService {
         role,
       });
 
-      // await this.authRepository.save(user);
+      const secret = createToken(user.email);
 
       // Store the tokens in cookies
       response.cookie("accessToken", accessToken, {
@@ -94,6 +97,12 @@ class AuthService {
       });
 
       response.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
+      response.cookie("csrfSecret", secret, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",
@@ -184,12 +193,11 @@ class AuthService {
 
           // Send welcome email
           const recipientEmails = [email];
-          const emailHTML = generateEmailHTML(
+          const emailHTML = generateOtpEmailHTML({
             email,
             firstname,
-            middlename,
-            lastname
-          );
+            lastname,
+          });
           const emailText = "Your account has been created";
 
           await sendMail(recipientEmails, emailText, emailHTML);
@@ -212,11 +220,7 @@ class AuthService {
       }
 
       // Blocked user check
-      if (
-        user?.library?.blocked === BLOCK_STATUS.BLOCKED ||
-        user?.user?.blocked === BLOCK_STATUS.BLOCKED ||
-        user?.libraryEmp?.blocked === BLOCK_STATUS.BLOCKED
-      ) {
+      if (user?.blocked === BLOCK_STATUS.BLOCKED) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
@@ -275,10 +279,22 @@ class AuthService {
 
   async signUpService(req: Request) {
     const { firstname, lastname, middlename, email, password } = req.body;
+    console.log(
+      "🚀 ~ AuthService ~ signUpService ~ firstname, lastname, middlename, email, password :",
+      firstname,
+      lastname,
+      middlename,
+      email,
+      password
+    );
 
     try {
       // Check for existing user
       const existingUser = await this.authRepository.findOneBy({ email });
+      console.log(
+        "🚀 ~ AuthService ~ signUpService ~ existingUser:",
+        existingUser
+      );
       if (existingUser) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
@@ -288,6 +304,10 @@ class AuthService {
       }
 
       const hashedPassword = await hashPassword(password);
+      console.log(
+        "🚀 ~ AuthService ~ signUpService ~ hashedPassword:",
+        hashedPassword
+      );
 
       // STEP 1 — Perform DB writes inside a transaction
       const { user, auth } = await AppDataSource.transaction(
@@ -310,15 +330,27 @@ class AuthService {
         }
       );
 
+      // genereate opt
+      const otp = generateOtp();
+      const hashedOtp = await hashPassword(otp);
+
+      const authOtp = this.otpRepository.create({
+        otp: hashedOtp,
+        auth: auth,
+        expireAt: otpExpiry(),
+      });
+
+      await this.otpRepository.save(authOtp);
+
       // STEP 2 — Email sending (outside DB transaction)
       const recipientEmails = [email];
-      const emailHTML = generateEmailHTML(
-        email,
-        firstname,
-        middlename,
-        lastname
-      );
-      const emailText = "Your account has been created";
+      const emailHTML = generateOtpEmailHTML({
+        email: email,
+        firstname: firstname,
+        lastname: lastname,
+        otp: otp,
+      });
+      const emailText = "Verify your account with the otp";
 
       try {
         await sendMail(recipientEmails, emailText, emailHTML);
@@ -353,26 +385,106 @@ class AuthService {
     }
   }
 
+  async verifyOtp(req: Request) {
+    try {
+      const { otp, email } = req.body;
+      console.log("🚀 ~ AuthService ~ verifyOtp ~ otp, email:", otp, email);
+
+      if (!email) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Email is required",
+        };
+      }
+
+      const existingUser = await this.authRepository
+        .createQueryBuilder("auth")
+        .where("auth.email = :email", { email })
+        .leftJoinAndSelect("auth.user", "user")
+        .getOne();
+
+      if (
+        existingUser?.blocked === BLOCK_STATUS.ACTIVE &&
+        existingUser.isEmailVerified === true
+      ) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: messages.errorMessages.accountAlreadyActive,
+        };
+      }
+
+      if (!existingUser) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: messages.errorMessages.notFound,
+        };
+      }
+
+      if (!otp) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "OTP is required",
+        };
+      }
+
+      const otpRecord = await this.otpRepository.findOne({
+        where: { auth: { id: existingUser.id } },
+      });
+
+      if (!otpRecord) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "OTP not found. Please request a new one.",
+        };
+      }
+
+      if (otpRecord.expireAt < new Date()) {
+        return { status: false, code: 400, message: "OTP expired" };
+      }
+
+      const isValid = await comparePassword(otp, otpRecord.otp);
+
+      if (!isValid) {
+        return { status: false, code: 400, message: "Invalid OTP" };
+      }
+
+      existingUser.isEmailVerified = true;
+      existingUser.blocked = BLOCK_STATUS.ACTIVE;
+      await this.authRepository.save(existingUser);
+
+      await this.otpRepository.delete({ id: otpRecord.id });
+
+      return {
+        code: STATUS_CODE.SUCCESS,
+        status: true,
+        message: messages.successMessages.emailVerificationDone,
+      };
+    } catch (error) {
+      console.log("🚀 ~ verifyOtp error:", error);
+      return {
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+        status: false,
+        message: messages.errorMessages.serverError,
+      };
+    }
+  }
+
   async authorizeUser(req: AuthenticatedRequest, res: Response) {
     try {
       const { id } = req?.user;
       const user = await this.authRepository
         .createQueryBuilder("auth")
-        .leftJoinAndSelect("auth.user", "user")
-        .leftJoinAndSelect("auth.admin", "admin")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-        .where("auth.id = :id", { id }) // Filter by authenticated user ID
+        .where("auth.id = :id", { id })
         .getOne();
 
       console.log("🚀 ~ authorizeUser: ~ user:", user);
 
-      if (
-        user?.admin?.blocked &&
-        user?.user?.blocked &&
-        user?.library?.blocked &&
-        user?.libraryEmp?.blocked === BLOCK_STATUS.BLOCKED
-      ) {
+      if (user?.blocked === BLOCK_STATUS.BLOCKED) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
@@ -471,7 +583,7 @@ class AuthService {
   async logoutService(response: Response) {
     response.clearCookie("accessToken");
     response.clearCookie("refreshToken");
-    response.clearCookie("csrfSecret"); 
+    response.clearCookie("csrfSecret");
     return {
       status: STATUS_CODE.SUCCESS,
       message: messages?.successMessages?.authentication?.logout,
@@ -479,41 +591,68 @@ class AuthService {
   }
 }
 
-const generateEmailHTML = (
-  email: string,
-  firstname: string,
-  middlename: string,
-  lastname: string
-) => {
+export const generateOtpEmailHTML = ({
+  email,
+  firstname,
+  lastname,
+  otp,
+  expiryMinutes = 5,
+}: OtpEmailParams) => {
   return `
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Our Community!</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Your Account ${email}</title>
 </head>
-<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; color: #333333;">
-  <div style="max-width: 600px; margin: 20px auto; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <!-- Header Section -->
-    <div style="background-color: #4CAF50; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-      <h1 style="margin: 0; font-size: 24px;">Thank You for Signing Up!</h1>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif; color:#333;">
+  <div style="max-width:600px; margin:30px auto; background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+
+    <!-- Header -->
+    <div style="background-color:#4CAF50; padding:20px; text-align:center; color:#ffffff;">
+      <h1 style="margin:0; font-size:22px;">Account Verification</h1>
     </div>
-    
-    <!-- Main Content -->
-    <div style="padding: 20px; text-align: center;">
-      <p style="font-size: 16px; line-height: 1.5;">Dear ${firstname} ${
-    middlename ? middlename : ""
-  } ${lastname},</p>
-      <p style="font-size: 16px; line-height: 1.5;">We're thrilled to have you join our community. Get ready to explore exclusive content and stay updated with our latest news.</p>
-      <a href="https://yourwebsite.com/login" style="display: inline-block; background-color: #4CAF50; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; margin-top: 20px;">Access Your Account</a>
+
+    <!-- Content -->
+    <div style="padding:25px; text-align:center;">
+      <p style="font-size:16px; margin-bottom:10px;">
+        Hello <strong>${firstname} ${lastname}</strong>,
+      </p>
+
+      <p style="font-size:15px; line-height:1.6;">
+        Use the verification code below to complete your signup.
+      </p>
+
+      <div style="margin:30px 0;">
+        <span style="
+          display:inline-block;
+          font-size:32px;
+          letter-spacing:6px;
+          font-weight:bold;
+          background:#f0f0f0;
+          padding:15px 25px;
+          border-radius:6px;
+          color:#333;
+        ">
+          ${otp}
+        </span>
+      </div>
+
+      <p style="font-size:14px; color:#555;">
+        This code will expire in <strong>${expiryMinutes} minutes</strong>.
+      </p>
+
+      <p style="font-size:14px; color:#777; margin-top:25px;">
+        If you did not request this, please ignore this email.
+      </p>
     </div>
-    
+
     <!-- Footer -->
-    <div style="text-align: center; padding: 20px; background-color: #f9f9f9; border-radius: 0 0 8px 8px; font-size: 14px; color: #666666;">
-      <p style="margin: 0;">If you have any questions, feel free to <a href="https://yourwebsite.com/contact" style="color: #4CAF50; text-decoration: none;">contact us</a>.</p>
-      <p style="margin: 0;">&copy; 2025 Your Company. All rights reserved.</p>
+    <div style="background:#f9f9f9; padding:15px; text-align:center; font-size:13px; color:#666;">
+      <p style="margin:0;">© 2025 Your Company. All rights reserved.</p>
     </div>
+
   </div>
 </body>
 </html>

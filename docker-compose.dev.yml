@@ -1,4 +1,3 @@
-version: "3.9"
 
 services:
   frontend:
@@ -7,12 +6,12 @@ services:
       dockerfile: Dockerfile.dev
     restart: always
     ports:
-      - "5173:80"           # React dev server port
+      - "5173:5173"           # React dev server port
     env_file:
       - ./frontend/.env
     volumes:
       - ./frontend:/app       # hot reload
-    command: npm run dev      # ensure dev server runs
+      - /app/node_modules     # prevent mounting host's node_modules
 
   backend:
     build:
@@ -28,8 +27,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: nodemon --watch . --ext ts,json --exec ts-node src/server.ts
-    # or whatever starts your backend dev server
+  # or whatever starts your backend dev server
 
   postgres:
     image: postgres:alpine
@@ -38,9 +36,9 @@ services:
     ports:
       - "5433:5432"            # host:container
     environment:
-      POSTGRES_USER: postgres_user     # Replace with your username
-      POSTGRES_PASSWORD: postgres_pass # Replace with your password
-      POSTGRES_DB: library_db          # Replace with your DB name
+      POSTGRES_DB: library_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: r33w@z@123
     volumes:
       - pgdata:/var/lib/postgresql/data
 

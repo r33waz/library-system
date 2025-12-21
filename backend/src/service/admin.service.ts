@@ -1,6 +1,6 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
-import { STATUS_CODE } from "../constant/enum";
+import { BLOCK_STATUS, STATUS_CODE } from "../constant/enum";
 import Admin from "../entities/admin.entity";
 import { Auth } from "../entities/auth.enity";
 import Library from "../entities/library.entity";
@@ -13,6 +13,65 @@ class AdminService {
   private authRepository = AppDataSource.getRepository(Auth);
   private libraryRepository = AppDataSource.getRepository(Library);
 
+  async create(req: Request) {
+    try {
+      const {
+        email,
+        password,
+        name,
+        description,
+        number,
+        media,
+        city,
+        state,
+        street,
+      } = req.body;
+
+      const existingEmail = await this.authRepository.findOneBy({ email });
+      if (existingEmail)
+        return {
+          status: false,
+          code: STATUS_CODE.BAD_REQUEST,
+          message: messages?.errorMessages?.alreadyExists,
+        };
+
+      const hashedPassword = await hashPassword(password);
+
+      await AppDataSource.transaction(async (transactionalEntityManager) => {
+        const library = new Library();
+        library.name = name;
+        library.description = description;
+        library.phoneNumber = number;
+        library.city = city;
+        library.street = street;
+        library.state = state;
+        if (media) {
+          library.profilepic = media;
+        }
+        await transactionalEntityManager.save(library);
+
+        const auth = new Auth();
+        auth.email = email;
+        auth.password = hashedPassword;
+        auth.library = library;
+        auth.blocked = BLOCK_STATUS.ACTIVE;
+        auth.isEmailVerified = true;
+        await transactionalEntityManager.save(auth);
+      });
+
+      return {
+        status: true,
+        code: STATUS_CODE.CREATED,
+        message: messages?.successMessages?.libraryAdmin?.create,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+        message: messages?.errorMessages?.serverError,
+      };
+    }
+  }
   // Method to get all admins
   async getAllAdmin(req: Request) {
     const searchQuery = req.query.search;
@@ -117,96 +176,37 @@ class AdminService {
   }
 
   // Method to create a new library admin
-  async create(req: Request) {
-    try {
-      const {
-        email,
-        password,
-        name,
-        description,
-        number,
-        media,
-        status,
-        city,
-        state,
-        street,
-      } = req.body;
-
-      const existingEmail = await this.authRepository.findOneBy({ email });
-      if (existingEmail)
-        return {
-          status: false,
-          code: STATUS_CODE.BAD_REQUEST,
-          message: messages?.errorMessages?.alreadyExists,
-        };
-
-      const hashedPassword = await hashPassword(password);
-
-      await AppDataSource.transaction(async (transactionalEntityManager) => {
-        const library = new Library();
-        library.name = name;
-        library.description = description;
-        library.phoneNumber = number;
-        library.status = status;
-        library.city = city;
-        library.street = street;
-        library.state = state;
-        if (media) {
-          library.profilepic = media;
-        }
-        await transactionalEntityManager.save(library);
-
-        const auth = new Auth();
-        auth.email = email;
-        auth.password = hashedPassword;
-        auth.library = library;
-        await transactionalEntityManager.save(auth);
-      });
-
-      return {
-        status: true,
-        code: STATUS_CODE.CREATED,
-        message: messages?.successMessages?.libraryAdmin?.create,
-      };
-    } catch (error) {
-      return {
-        status: false,
-        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
-        message: messages?.errorMessages?.serverError,
-      };
-    }
-  }
 
   // Method to update library status
-  async updateStatus(req: Request) {
-    try {
-      const { id } = req.params;
-      const { status, blocked } = req.body;
-      const library = await this.libraryRepository.findOneBy({ id });
-      if (!library) {
-        return {
-          code: STATUS_CODE.NOT_FOUND,
-          status: false,
-          message: messages?.errorMessages?.notFound,
-        };
-      } else {
-        library.status = status ? status : library.status;
-        library.blocked = blocked ? blocked : library.blocked;
-        await this.libraryRepository.save(library);
-      }
-      return {
-        code: STATUS_CODE.SUCCESS,
-        status: true,
-        message: messages?.successMessages?.libraryAdmin?.update,
-      };
-    } catch (error) {
-      return {
-        code: STATUS_CODE.SUCCESS,
-        status: false,
-        message: messages?.successMessages?.libraryAdmin?.update,
-      };
-    }
-  }
+  // async updateStatus(req: Request) {
+  //   try {
+  //     const { id } = req.params;
+  //     const { status, blocked } = req.body;
+  //     const library = await this.libraryRepository.findOneBy({ id });
+  //     if (!library) {
+  //       return {
+  //         code: STATUS_CODE.NOT_FOUND,
+  //         status: false,
+  //         message: messages?.errorMessages?.notFound,
+  //       };
+  //     } else {
+  //       library.status = status ? status : library.status;
+  //       library.blocked = blocked ? blocked : library.blocked;
+  //       await this.libraryRepository.save(library);
+  //     }
+  //     return {
+  //       code: STATUS_CODE.SUCCESS,
+  //       status: true,
+  //       message: messages?.successMessages?.libraryAdmin?.update,
+  //     };
+  //   } catch (error) {
+  //     return {
+  //       code: STATUS_CODE.SUCCESS,
+  //       status: false,
+  //       message: messages?.successMessages?.libraryAdmin?.update,
+  //     };
+  //   }
+  // }
 }
 
 export default new AdminService();

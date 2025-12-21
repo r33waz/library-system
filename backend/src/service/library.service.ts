@@ -1,6 +1,6 @@
 import { Request } from "express";
 import AppDataSource from "../config/db.config";
-import { STATUS_CODE } from "../constant/enum";
+import { BLOCK_STATUS, STATUS_CODE } from "../constant/enum";
 import { Auth } from "../entities/auth.enity";
 import Library from "../entities/library.entity";
 import { LibraryEmp } from "../entities/libraryEmp.entity";
@@ -63,7 +63,12 @@ class LibraryService {
         }
 
         const hashedPassword = await hashPassword(password);
-        const newAuth = authRepo.create({ email, password: hashedPassword });
+        const newAuth = authRepo.create({
+          email,
+          password: hashedPassword,
+          blocked: BLOCK_STATUS.ACTIVE,
+          isEmailVerified: true,
+        });
         await authRepo.save(newAuth);
 
         const newLibraryEmpData: Partial<LibraryEmp> = {

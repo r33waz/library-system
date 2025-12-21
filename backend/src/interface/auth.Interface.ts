@@ -25,13 +25,20 @@ export interface AuthenticatedRequest extends Request {
   user: JwtPayloadWithId;
 }
 
-
 export interface AuthRequest extends Request {
   user?: {
     id: string;
     libraryEmpId?: string;
-    library?:{
+    library?: {
       id: string;
-    }
+    };
   };
+}
+
+export interface OtpEmailParams {
+  email: string;
+  firstname: string;
+  lastname: string;
+  otp?: string;
+  expiryMinutes?: number;
 }

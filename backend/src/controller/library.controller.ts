@@ -33,6 +33,15 @@ class LibraryController {
     });
   }
 
+  async getOneEmp(req: Request, res: Response) {
+    const result = await libraryService.getOneEmp(req);
+    sendResponse(res, {
+      httpCode: result?.code,
+      status: result?.status,
+      data: result?.data,
+    });
+  }
+
   async update(req: Request, res: Response) {
     const result = await libraryService.update(req);
     sendResponse(res, {

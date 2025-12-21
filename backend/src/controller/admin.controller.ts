@@ -31,12 +31,12 @@ class AdminController {
   }
 
   async updateStatus(req: Request, res: Response) {
-    const result = await AdminService.updateStatus(req);
-    sendResponse(res, {
-      status: result?.status,
-      message: result?.message,
-      httpCode: result?.code,
-    });
+    // const result = await AdminService.updateStatus(req);
+    // sendResponse(res, {
+    //   status: result?.status,
+    //   message: result?.message,
+    //   httpCode: result?.code,
+    // });
   }
 }
 
