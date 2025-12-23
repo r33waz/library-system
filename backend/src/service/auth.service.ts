@@ -22,103 +22,120 @@ class AuthService {
   private authRepository = AppDataSource.getRepository(Auth);
   private otpRepository = AppDataSource.getRepository(AuthOtp);
 
-  async login(body: ILogin, response: Response) {
+  async signUpService(req: Request) {
+    const { firstname, lastname, middlename, email, password } = req.body;
+    console.log(
+      "🚀 ~ AuthService ~ signUpService ~ firstname, lastname, middlename, email, password :",
+      firstname,
+      lastname,
+      middlename,
+      email,
+      password
+    );
+
     try {
-      const { email, password } = body;
-      if (!email || !password) {
+      // Check for existing user
+      const existingUser = await this.authRepository.findOneBy({ email });
+      console.log(
+        "🚀 ~ AuthService ~ signUpService ~ existingUser:",
+        existingUser
+      );
+
+
+      if (existingUser) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
-          message: messages?.errorMessages.authenticationFailed,
+          message: messages.errorMessages.alreadyExists,
         };
       }
 
-      const user = await this.authRepository
-        .createQueryBuilder("auth")
-        .leftJoinAndSelect("auth.user", "user")
-        .leftJoinAndSelect("auth.admin", "admin")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-        .addSelect("auth.password") // Ensure password is fetched
-        .where("auth.email = :email", { email })
-        .getOne();
-
-      if (!user) {
+      if (email.includes('+')) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
-          message: messages?.errorMessages.authenticationFailed,
+          message: "Email addresses with '+' are not allowed.",
         };
       }
 
-      if (user?.blocked === BLOCK_STATUS.BLOCKED) {
+      const hashedPassword = await hashPassword(password);
+      console.log(
+        "🚀 ~ AuthService ~ signUpService ~ hashedPassword:",
+        hashedPassword
+      );
+
+      // STEP 1 — Perform DB writes inside a transaction
+      const { user, auth } = await AppDataSource.transaction(
+        async (transaction) => {
+          const user = transaction.create(User, {
+            firstname,
+            lastname,
+            middlename,
+          });
+          await transaction.save(user);
+
+          const auth = transaction.create(Auth, {
+            email,
+            password: hashedPassword,
+            user,
+          });
+          await transaction.save(auth);
+
+          return { user, auth };
+        }
+      );
+
+      // genereate opt
+      const otp = generateOtp();
+      const hashedOtp = await hashPassword(otp);
+
+      const authOtp = this.otpRepository.create({
+        otp: hashedOtp,
+        auth: auth,
+        expireAt: otpExpiry(),
+      });
+
+      await this.otpRepository.save(authOtp);
+
+      // STEP 2 — Email sending (outside DB transaction)
+      const recipientEmails = [email];
+      const emailHTML = generateOtpEmailHTML({
+        email: email,
+        firstname: firstname,
+        lastname: lastname,
+        otp: otp,
+      });
+      const emailText = "Verify your account with the otp";
+
+      try {
+        await sendMail(recipientEmails, emailText, emailHTML);
+      } catch (emailErr) {
+        console.error("Email failed. Rolling back new user...", emailErr);
+
+        // STEP 3 — Manual rollback if email fails
+        await AppDataSource.getRepository(Auth).delete({ id: auth.id });
+        await AppDataSource.getRepository(User).delete({ id: user.id });
+
         return {
-          code: STATUS_CODE.BAD_REQUEST,
+          code: STATUS_CODE.INTERNAL_SERVER_ERROR,
           status: false,
-          message: messages?.errorMessages?.accountBlocked,
+          message: "Signup failed. Could not send confirmation email.",
         };
       }
 
-      const matchPassword = await comparePassword(password, user.password);
-      if (!matchPassword) {
-        return {
-          code: STATUS_CODE.BAD_REQUEST,
-          status: false,
-          message: messages?.errorMessages.authenticationFailed,
-        };
-      }
-
-      // Extract role and email properly
-      const role =
-        user.admin?.role ??
-        user.library?.role ??
-        user.user?.role ??
-        user?.libraryEmp?.role;
-
-      // Generating the tokens
-      const accessToken = genAccessToken({
-        email: user?.email,
-        id: user.id,
-        role,
-      });
-      const refreshToken = genRefreshToken({
-        email: user?.email,
-        id: user.id,
-        role,
-      });
-
-      const secret = createToken(user.email);
-
-      // Store the tokens in cookies
-      response.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-
-      response.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-
-      response.cookie("csrfSecret", secret, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      });
-
+      // STEP 4 — Final response on success
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
-        data: role,
-        message: messages?.successMessages?.authentication.login,
+        message: messages.successMessages.authentication.register,
       };
     } catch (error) {
+      console.log("🚀 ~ signUpService error:", error);
+
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
         status: false,
-        message: messages?.errorMessages?.serverError,
+        message: messages.errorMessages.serverError,
       };
     }
   }
@@ -277,110 +294,103 @@ class AuthService {
     }
   }
 
-  async signUpService(req: Request) {
-    const { firstname, lastname, middlename, email, password } = req.body;
-    console.log(
-      "🚀 ~ AuthService ~ signUpService ~ firstname, lastname, middlename, email, password :",
-      firstname,
-      lastname,
-      middlename,
-      email,
-      password
-    );
-
+  async login(body: ILogin, response: Response) {
     try {
-      // Check for existing user
-      const existingUser = await this.authRepository.findOneBy({ email });
-      console.log(
-        "🚀 ~ AuthService ~ signUpService ~ existingUser:",
-        existingUser
-      );
-      if (existingUser) {
+      const { email, password } = body;
+      if (!email || !password) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
-          message: messages.errorMessages.alreadyExists,
+          message: messages?.errorMessages.authenticationFailed,
         };
       }
 
-      const hashedPassword = await hashPassword(password);
-      console.log(
-        "🚀 ~ AuthService ~ signUpService ~ hashedPassword:",
-        hashedPassword
-      );
+      const user = await this.authRepository
+        .createQueryBuilder("auth")
+        .leftJoinAndSelect("auth.user", "user")
+        .leftJoinAndSelect("auth.admin", "admin")
+        .leftJoinAndSelect("auth.library", "library")
+        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
+        .addSelect("auth.password") // Ensure password is fetched
+        .where("auth.email = :email", { email })
+        .getOne();
 
-      // STEP 1 — Perform DB writes inside a transaction
-      const { user, auth } = await AppDataSource.transaction(
-        async (transaction) => {
-          const user = transaction.create(User, {
-            firstname,
-            lastname,
-            middlename,
-          });
-          await transaction.save(user);
-
-          const auth = transaction.create(Auth, {
-            email,
-            password: hashedPassword,
-            user,
-          });
-          await transaction.save(auth);
-
-          return { user, auth };
-        }
-      );
-
-      // genereate opt
-      const otp = generateOtp();
-      const hashedOtp = await hashPassword(otp);
-
-      const authOtp = this.otpRepository.create({
-        otp: hashedOtp,
-        auth: auth,
-        expireAt: otpExpiry(),
-      });
-
-      await this.otpRepository.save(authOtp);
-
-      // STEP 2 — Email sending (outside DB transaction)
-      const recipientEmails = [email];
-      const emailHTML = generateOtpEmailHTML({
-        email: email,
-        firstname: firstname,
-        lastname: lastname,
-        otp: otp,
-      });
-      const emailText = "Verify your account with the otp";
-
-      try {
-        await sendMail(recipientEmails, emailText, emailHTML);
-      } catch (emailErr) {
-        console.error("Email failed. Rolling back new user...", emailErr);
-
-        // STEP 3 — Manual rollback if email fails
-        await AppDataSource.getRepository(Auth).delete({ id: auth.id });
-        await AppDataSource.getRepository(User).delete({ id: user.id });
-
+      if (!user) {
         return {
-          code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+          code: STATUS_CODE.BAD_REQUEST,
           status: false,
-          message: "Signup failed. Could not send confirmation email.",
+          message: messages?.errorMessages.authenticationFailed,
         };
       }
 
-      // STEP 4 — Final response on success
+      if (user?.blocked === BLOCK_STATUS.BLOCKED) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: messages?.errorMessages?.accountBlocked,
+        };
+      }
+
+      const matchPassword = await comparePassword(password, user.password);
+      if (!matchPassword) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: messages?.errorMessages.authenticationFailed,
+        };
+      }
+
+      // Extract role and email properly
+      const role =
+        user.admin?.role ??
+        user.library?.role ??
+        user.user?.role ??
+        user?.libraryEmp?.role;
+
+      // Generating the tokens
+      const accessToken = genAccessToken({
+        email: user?.email,
+        id: user.id,
+        role,
+      });
+      const refreshToken = genRefreshToken({
+        email: user?.email,
+        id: user.id,
+        role,
+      });
+
+      const secret = createToken(user.email);
+
+      // Store the tokens in cookies
+      response.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
+      response.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
+      response.cookie("csrfSecret", secret, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
       return {
         code: STATUS_CODE.SUCCESS,
         status: true,
-        message: messages.successMessages.authentication.register,
+        data: role,
+        message: messages?.successMessages?.authentication.login,
       };
     } catch (error) {
-      console.log("🚀 ~ signUpService error:", error);
-
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
         status: false,
-        message: messages.errorMessages.serverError,
+        message: messages?.errorMessages?.serverError,
       };
     }
   }

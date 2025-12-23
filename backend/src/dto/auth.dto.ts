@@ -4,6 +4,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
 } from "class-validator";
 
 class LoginDto {
@@ -19,6 +20,10 @@ class LoginDto {
 class SignupDto {
   @IsEmail()
   @IsNotEmpty()
+  @Matches(/^[A-Za-z0-9.]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/, {
+    message:
+      "Email must not contain special characters like !  # $ % ^ & * _ - + = < >.",
+  })
   email: string;
 
   @IsNotEmpty()
