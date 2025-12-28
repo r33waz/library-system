@@ -15,6 +15,7 @@ router.post(
 router.post("/verifyOtp", authController.verifyOtp);
 router.post("/login", validateDto(LoginDto), authController.login);
 router.post("/google-login", authController.googleLogin);
+router.post("/refresh-token", authController.refreshToken);
 router.use(authenticateUser);
 router.get("/authorize", authController.authorizedUser);
 router.get("/csrf-token", authController.csrfToken);

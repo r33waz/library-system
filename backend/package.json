@@ -6,16 +6,11 @@
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-
-     "typeorm": "typeorm-ts-node-commonjs",
-
-
+    "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm -- migration:generate ./src/migrations/auto-migration -d ./src/config/db.config.ts",
     "migration:create": "npm run typeorm -- migration:create ./src/migrations/manual-migration",
     "migration:run": "npm run typeorm -- migration:run -d ./src/config/db.config.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d ./src/config/db.config.ts",
-
-
     "seedAdmin": "ts-node src/seeds/seedAdmin.ts",
     "seedCategories": "ts-node src/seeds/seedCategories.ts",
     "seedGenres": "ts-node src/seeds/seedGenres.ts"
@@ -27,7 +22,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.2",
+    "class-validator": "^0.14.3",
     "cloudinary": "^2.8.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

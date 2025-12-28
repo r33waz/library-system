@@ -7,7 +7,7 @@ import { Auth } from "../entities/auth.enity";
 import { AuthOtp } from "../entities/otp.entity";
 import User from "../entities/user.entity";
 import { generateOtp, otpExpiry } from "../helper/genOtp";
-import { genAccessToken, genRefreshToken } from "../helper/genToken";
+import { genAccessToken, genRefreshToken, verifyToken } from "../helper/genToken";
 import { comparePassword, hashPassword } from "../helper/passwordHelper";
 import {
   AuthenticatedRequest,
@@ -331,6 +331,15 @@ class AuthService {
         };
       }
 
+      // Check if user has password (not OAuth user)
+      if (!user.password) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "This account uses Google login. Please use Google sign-in.",
+        };
+      }
+
       const matchPassword = await comparePassword(password, user.password);
       if (!matchPassword) {
         return {
@@ -385,6 +394,89 @@ class AuthService {
         status: true,
         data: role,
         message: messages?.successMessages?.authentication.login,
+      };
+    } catch (error) {
+      return {
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+        status: false,
+        message: messages?.errorMessages?.serverError,
+      };
+    }
+  }
+
+  async refreshTokenService(req: Request, res: Response) {
+    try {
+      const refreshToken = req.cookies?.refreshToken;
+
+      if (!refreshToken) {
+        return {
+          code: STATUS_CODE.UNAUTHORIZED,
+          status: false,
+          message: "Refresh token not found",
+        };
+      }
+
+      // Verify refresh token
+      const decoded = await verifyToken(refreshToken, process.env.REFRESH_TOKEN);
+      if (!decoded) {
+        return {
+          code: STATUS_CODE.UNAUTHORIZED,
+          status: false,
+          message: "Invalid refresh token",
+        };
+      }
+
+      // Get user data
+      const user = await this.authRepository
+        .createQueryBuilder("auth")
+        .leftJoinAndSelect("auth.user", "user")
+        .leftJoinAndSelect("auth.admin", "admin")
+        .leftJoinAndSelect("auth.library", "library")
+        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
+        .where("auth.id = :id", { id: decoded.id })
+        .getOne();
+
+      if (!user || user.blocked === BLOCK_STATUS.BLOCKED) {
+        return {
+          code: STATUS_CODE.UNAUTHORIZED,
+          status: false,
+          message: "User not found or blocked",
+        };
+      }
+
+      // Generate new access token
+      const role =
+        user.admin?.role ??
+        user.library?.role ??
+        user.user?.role ??
+        user?.libraryEmp?.role;
+
+      const newAccessToken = genAccessToken({
+        email: user.email,
+        id: user.id,
+        role,
+      });
+
+      const secret = createToken(user.email);
+
+      // Set new access token cookie
+      res.cookie("accessToken", newAccessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
+      res.cookie("csrfSecret", secret, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "lax",
+      });
+
+      return {
+        code: STATUS_CODE.SUCCESS,
+        status: true,
+        data: role,
+        message: "Token refreshed successfully",
       };
     } catch (error) {
       return {
@@ -595,7 +687,8 @@ class AuthService {
     response.clearCookie("refreshToken");
     response.clearCookie("csrfSecret");
     return {
-      status: STATUS_CODE.SUCCESS,
+      status: true,
+      code: STATUS_CODE.SUCCESS,
       message: messages?.successMessages?.authentication?.logout,
     };
   }

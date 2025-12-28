@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  Index,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -17,6 +18,8 @@ import Media from "./media.entity";
 import WishList from "./wishList.entity";
 
 @Entity("book")
+@Index("IDX_BOOK_SLUG", ["slug"])
+@Index("IDX_BOOK_LIBRARY", ["library"])
 export class Book extends BaseEntity {
   @Column()
   title: string;
@@ -73,13 +76,13 @@ export class Book extends BaseEntity {
   @JoinTable({ name: "book_category" })
   category: Category[];
 
-  @OneToMany(() => WishList, (wishlist) => wishlist.book)
+  @OneToMany(() => WishList, (wishlist) => wishlist.book, { cascade: true, onDelete: "CASCADE" })
   wishlistedBy: WishList[];
 
-  @OneToMany(() => BorrowRequest, (borrow_req) => borrow_req.book)
+  @OneToMany(() => BorrowRequest, (borrow_req) => borrow_req.book, { cascade: true, onDelete: "CASCADE" })
   borrowedBy: BorrowRequest[];
 
-  @OneToMany(() => Bill, (bill) => bill.book)
+  @OneToMany(() => Bill, (bill) => bill.book, { cascade: true, onDelete: "CASCADE" })
   bill: Bill[];
 }
 

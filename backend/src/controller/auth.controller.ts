@@ -66,17 +66,23 @@ class AuthController {
   // Logout handler
   async logout(req: Request, res: Response): Promise<void> {
     const result = await authService.logoutService(res);
-    res.status(result?.status || 200).json({
+    sendResponse(res, {
       status: result?.status,
       message: result?.message,
+      httpCode: result?.code,
     });
   }
 
   // Refresh Token handler
-  // refreshToken: async (req: Request, res: Response): Promise<void> => {
-  //   const { email } = req.body;
-  //   res.send(`Refresh Token logic here for email: ${email}`);
-  // },
+  async refreshToken(req: Request, res: Response): Promise<void> {
+    const result = await authService.refreshTokenService(req, res);
+    sendResponse(res, {
+      status: result?.status,
+      message: result?.message,
+      httpCode: result?.code,
+      data: result?.data,
+    });
+  }
 
   // authorized user
   async authorizedUser(req: Request, res: Response): Promise<void> {

@@ -1,10 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, Unique } from "typeorm";
 import BaseEntity from "../constant/base.entity";
 import Book from "./book.entity";
 import User from "./user.entity";
 
 @Entity("wishlist")
 @Unique(["userId", "bookId"])
+@Index("IDX_WISHLIST_USER_BOOK", ["userId", "bookId"])
 // prevents user from adding same book twice
 class WishList extends BaseEntity {
   // Explicitly define the userId and bookId columns
