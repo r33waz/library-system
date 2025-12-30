@@ -8,7 +8,7 @@ import { User } from "./user.entity";
 
 @Entity("bill")
 export class Bill extends BaseEntity {
-  @OneToOne(() => BorrowRequest)
+  @OneToOne(() => BorrowRequest, (borrowRequest) => borrowRequest.bill)
   @JoinColumn({ name: "borrow_request_id" })
   borrowRequest: BorrowRequest;
 

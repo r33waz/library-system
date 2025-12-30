@@ -2,6 +2,7 @@ import {
   Column,
   Entity,
   Index,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -18,12 +19,17 @@ import Media from "./media.entity";
 import WishList from "./wishList.entity";
 
 @Entity("book")
-@Index("IDX_BOOK_SLUG", ["slug"])
-@Index("IDX_BOOK_LIBRARY", ["library"])
+@Index("IDX_BOOK_LIBRARY_ID", ["library"])
+@Index("IDX_BOOK_AUTHOR", ["author"])
+@Index("IDX_BOOK_PRICE", ["price"])
+@Index("IDX_BOOK_AVAILABLE_COPIES", ["availableCopies"])
+@Index("IDX_BOOK_DELETED_AT", ["deletedAt"])
 export class Book extends BaseEntity {
+
   @Column()
   title: string;
 
+  // unique = automatically indexed
   @Column({ unique: true })
   slug: string;
 
@@ -33,7 +39,7 @@ export class Book extends BaseEntity {
   @Column()
   coverColor: string;
 
-  @Column()
+  @Column({ type: "text" })
   description: string;
 
   @Column()
@@ -46,15 +52,15 @@ export class Book extends BaseEntity {
   availableCopies: number;
 
   @Column({ nullable: true })
-  videoUrlNeplai: string;
+  videoUrlNeplai?: string;
 
   @Column({ nullable: true })
-  videoUrlEnglish: string;
+  videoUrlEnglish?: string;
 
   @Column({ nullable: true })
-  videoUrlHindi: string;
+  videoUrlHindi?: string;
 
-  @Column()
+  @Column({ type: "text" })
   summary: string;
 
   @OneToOne(() => Media, (media) => media.bookCoverImage, {
@@ -62,27 +68,39 @@ export class Book extends BaseEntity {
   })
   coverImage: Media;
 
-  // Foreign key: A Book belongs to one Library
-  @ManyToOne(() => Library, (library) => library.books, { onDelete: "CASCADE" })
+  // FK — indexed via decorator above
+  @ManyToOne(() => Library, (library) => library.books, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "libraryId" })
   library: Library;
 
-  @ManyToMany(() => Genre, (genre) => genre.book, { onDelete: "CASCADE" })
+  // Join tables auto-index both sides
+  @ManyToMany(() => Genre, (genre) => genre.book)
   @JoinTable({ name: "book_genre" })
   genre: Genre[];
 
-  @ManyToMany(() => Category, (category) => category.book, {
-    onDelete: "CASCADE",
-  })
+  @ManyToMany(() => Category, (category) => category.book)
   @JoinTable({ name: "book_category" })
   category: Category[];
 
-  @OneToMany(() => WishList, (wishlist) => wishlist.book, { cascade: true, onDelete: "CASCADE" })
+  // FK indexes live on the child tables
+  @OneToMany(() => WishList, (wishlist) => wishlist.book, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   wishlistedBy: WishList[];
 
-  @OneToMany(() => BorrowRequest, (borrow_req) => borrow_req.book, { cascade: true, onDelete: "CASCADE" })
+  @OneToMany(() => BorrowRequest, (borrow_req) => borrow_req.book, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   borrowedBy: BorrowRequest[];
 
-  @OneToMany(() => Bill, (bill) => bill.book, { cascade: true, onDelete: "CASCADE" })
+  @OneToMany(() => Bill, (bill) => bill.book, {
+    cascade: true,
+    onDelete: "CASCADE",
+  })
   bill: Bill[];
 }
 

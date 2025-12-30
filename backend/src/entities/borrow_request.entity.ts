@@ -14,10 +14,14 @@ import { Library } from "./library.entity";
 import { User } from "./user.entity";
 
 @Entity("borrow_request")
-@Index("IDX_BORROW_REQUEST_USER", ["user"])
-@Index("IDX_BORROW_REQUEST_BOOK", ["book"])
-@Index("IDX_BORROW_REQUEST_LIBRARY", ["library"])
+@Index("IDX_BR_USER_ID", ["user"])
+@Index("IDX_BR_BOOK_ID", ["book"])
+@Index("IDX_BR_LIBRARY_ID", ["library"])
+@Index("IDX_BR_STATUS", ["status"])
+@Index("IDX_BR_END_DATE", ["endDate"])
+@Index("IDX_BR_DELETED_AT", ["deletedAt"])
 export class BorrowRequest extends BaseEntity {
+
   @ManyToOne(() => Book, { onDelete: "CASCADE" })
   @JoinColumn({ name: "book_id" })
   book: Book;
@@ -30,12 +34,11 @@ export class BorrowRequest extends BaseEntity {
   @JoinColumn({ name: "library_id" })
   library: Library;
 
-  @Column()
-  startDate: string;
+  @Column({ type: "timestamp" })
+  startDate: Date;
 
-
-  @Column()
-  endDate: string;
+  @Column({ type: "timestamp" })
+  endDate: Date;
 
   @Column({
     type: "enum",
@@ -44,9 +47,11 @@ export class BorrowRequest extends BaseEntity {
   })
   status: BORROWER_STATUS;
 
+  @Index("IDX_BR_BILL_ID")
   @OneToOne(() => Bill, (bill) => bill.borrowRequest, {
     cascade: true,
     onDelete: "CASCADE",
   })
-  bill: Bill;
+  @JoinColumn({ name: "bill_id" })
+  bill?: Bill;
 }

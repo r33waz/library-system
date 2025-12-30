@@ -68,6 +68,7 @@ export const authorizeThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const resp = await main_url.get(endPoints?.authorize);
+      console.log("🚀 ~ authorize thunk resp:", resp)
       
       return resp.data;
     } catch (error: any) {

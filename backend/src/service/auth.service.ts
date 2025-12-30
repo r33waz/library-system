@@ -24,22 +24,10 @@ class AuthService {
 
   async signUpService(req: Request) {
     const { firstname, lastname, middlename, email, password } = req.body;
-    console.log(
-      "🚀 ~ AuthService ~ signUpService ~ firstname, lastname, middlename, email, password :",
-      firstname,
-      lastname,
-      middlename,
-      email,
-      password
-    );
 
     try {
       // Check for existing user
       const existingUser = await this.authRepository.findOneBy({ email });
-      console.log(
-        "🚀 ~ AuthService ~ signUpService ~ existingUser:",
-        existingUser
-      );
 
 
       if (existingUser) {
@@ -59,10 +47,6 @@ class AuthService {
       }
 
       const hashedPassword = await hashPassword(password);
-      console.log(
-        "🚀 ~ AuthService ~ signUpService ~ hashedPassword:",
-        hashedPassword
-      );
 
       // STEP 1 — Perform DB writes inside a transaction
       const { user, auth } = await AppDataSource.transaction(
@@ -130,7 +114,6 @@ class AuthService {
         message: messages.successMessages.authentication.register,
       };
     } catch (error) {
-      console.log("🚀 ~ signUpService error:", error);
 
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
@@ -142,7 +125,6 @@ class AuthService {
 
   async googleLoginService(req: Request, res: Response) {
     const idToken = req.headers.authorization?.split(" ")[1] as string;
-    console.log("🚀 ~ googleLoginService: ~ idToken:", idToken);
 
     if (!idToken) {
       return {
@@ -251,6 +233,9 @@ class AuthService {
         user.library?.role ??
         user.user?.role ??
         user?.libraryEmp?.role;
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
 
       // Generate tokens
       const accessToken = genAccessToken({
@@ -490,7 +475,6 @@ class AuthService {
   async verifyOtp(req: Request) {
     try {
       const { otp, email } = req.body;
-      console.log("🚀 ~ AuthService ~ verifyOtp ~ otp, email:", otp, email);
 
       if (!email) {
         return {
@@ -567,7 +551,6 @@ class AuthService {
         message: messages.successMessages.emailVerificationDone,
       };
     } catch (error) {
-      console.log("🚀 ~ verifyOtp error:", error);
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
         status: false,
@@ -581,10 +564,14 @@ class AuthService {
       const { id } = req?.user;
       const user = await this.authRepository
         .createQueryBuilder("auth")
+        .leftJoinAndSelect("auth.user", "user")
+        .leftJoinAndSelect("auth.admin", "admin")
+        .leftJoinAndSelect("auth.library", "library")
+        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
         .where("auth.id = :id", { id })
         .getOne();
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ user:", user)
 
-      console.log("🚀 ~ authorizeUser: ~ user:", user);
 
       if (user?.blocked === BLOCK_STATUS.BLOCKED) {
         return {
@@ -599,7 +586,6 @@ class AuthService {
         user?.user?.role ??
         user?.libraryEmp?.role;
 
-      console.log("🚀 ~ authorizeUser: ~ roles:", role);
 
       return {
         code: STATUS_CODE.SUCCESS,
@@ -652,10 +638,9 @@ class AuthService {
       // Remove null values
       return {
         status: STATUS_CODE.SUCCESS,
-        data: { ...user, role },
+        data:user,
       };
     } catch (error) {
-      console.log("🚀 ~ me: ~ error:", error);
       return {
         status: STATUS_CODE.INTERNAL_SERVER_ERROR,
         message: messages?.errorMessages.serverError,

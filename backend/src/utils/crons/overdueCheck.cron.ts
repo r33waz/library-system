@@ -1,4 +1,3 @@
-import moment from "moment";
 import cron from "node-cron";
 import { LessThanOrEqual } from "typeorm";
 import AppDataSource from "../../config/db.config";
@@ -10,15 +9,17 @@ import { billPrice, borrowDaysDiff, calculatePenalty } from "../billUtils";
 cron.schedule("0 0 * * *", async () => {
   try {
     console.log("Running the overdue check cron job...");
-    const today = moment().format("YYYY-MM-DD");
-    const tomorrow = moment(today).add(1, "days").format("YYYY-MM-DD");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
     const overDueCheckRequest = await AppDataSource.getRepository(
       BorrowRequest
     ).find({
       where: [
         {
           status: BORROWER_STATUS.BORROWED,
-          endDate: LessThanOrEqual(tomorrow),
+          endDate: LessThanOrEqual(today),
         },
         {
           status: BORROWER_STATUS.OVERDUE,

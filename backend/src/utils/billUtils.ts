@@ -9,8 +9,8 @@ export const borrowDaysDiff = ({
   startDate,
   endDate,
 }: {
-  startDate: string;
-  endDate: string;
+  startDate: Date;
+  endDate: Date;
 }) => {
   const startData = moment(startDate);
   const endData = moment(endDate);
@@ -34,7 +34,7 @@ export function calculatePenalty({
   endDate,
 }: {
   totalAmount: number;
-  endDate: string;
+  endDate: Date;
 }) {
   const penaltyRate = 0.02;
   const returnDate = moment(endDate);
@@ -51,7 +51,7 @@ export function calculatePenalty({
 cron.schedule("0 0 * * *", async () => {
   try {
     console.log("Running the overdue check cron job...");
-    const today = moment().format("YYYY-MM-DD");
+    const today = moment().toDate();
     const overDueCheckRequest = await AppDataSource.getRepository(
       BorrowRequest
     ).find({
