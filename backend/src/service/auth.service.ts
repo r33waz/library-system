@@ -7,7 +7,11 @@ import { Auth } from "../entities/auth.enity";
 import { AuthOtp } from "../entities/otp.entity";
 import User from "../entities/user.entity";
 import { generateOtp, otpExpiry } from "../helper/genOtp";
-import { genAccessToken, genRefreshToken, verifyToken } from "../helper/genToken";
+import {
+  genAccessToken,
+  genRefreshToken,
+  verifyToken,
+} from "../helper/genToken";
 import { comparePassword, hashPassword } from "../helper/passwordHelper";
 import {
   AuthenticatedRequest,
@@ -29,7 +33,6 @@ class AuthService {
       // Check for existing user
       const existingUser = await this.authRepository.findOneBy({ email });
 
-
       if (existingUser) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
@@ -38,7 +41,7 @@ class AuthService {
         };
       }
 
-      if (email.includes('+')) {
+      if (email.includes("+")) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
@@ -114,7 +117,6 @@ class AuthService {
         message: messages.successMessages.authentication.register,
       };
     } catch (error) {
-
       return {
         code: STATUS_CODE.INTERNAL_SERVER_ERROR,
         status: false,
@@ -125,6 +127,7 @@ class AuthService {
 
   async googleLoginService(req: Request, res: Response) {
     const idToken = req.headers.authorization?.split(" ")[1] as string;
+    console.log("🚀 ~ AuthService ~ googleLoginService ~ idToken:", idToken);
 
     if (!idToken) {
       return {
@@ -190,16 +193,16 @@ class AuthService {
             user = newAuth;
           });
 
-          // Send welcome email
-          const recipientEmails = [email];
-          const emailHTML = generateOtpEmailHTML({
-            email,
-            firstname,
-            lastname,
-          });
-          const emailText = "Your account has been created";
+          // // Send welcome email
+          // const recipientEmails = [email];
+          // const emailHTML = generateOtpEmailHTML({
+          //   email,
+          //   firstname,
+          //   lastname,
+          // });
+          // const emailText = "Your account has been created";
 
-          await sendMail(recipientEmails, emailText, emailHTML);
+          // await sendMail(recipientEmails, emailText, emailHTML);
         } catch (dbError) {
           console.error("Database error during user creation:", dbError);
           return {
@@ -233,9 +236,9 @@ class AuthService {
         user.library?.role ??
         user.user?.role ??
         user?.libraryEmp?.role;
-      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
-      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
-      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role)
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role);
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role);
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ role:", role);
 
       // Generate tokens
       const accessToken = genAccessToken({
@@ -402,7 +405,10 @@ class AuthService {
       }
 
       // Verify refresh token
-      const decoded = await verifyToken(refreshToken, process.env.REFRESH_TOKEN);
+      const decoded = await verifyToken(
+        refreshToken,
+        process.env.REFRESH_TOKEN
+      );
       if (!decoded) {
         return {
           code: STATUS_CODE.UNAUTHORIZED,
@@ -570,8 +576,7 @@ class AuthService {
         .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
         .where("auth.id = :id", { id })
         .getOne();
-      console.log("🚀 ~ AuthService ~ authorizeUser ~ user:", user)
-
+      console.log("🚀 ~ AuthService ~ authorizeUser ~ user:", user);
 
       if (user?.blocked === BLOCK_STATUS.BLOCKED) {
         return {
@@ -585,7 +590,6 @@ class AuthService {
         user?.library?.role ??
         user?.user?.role ??
         user?.libraryEmp?.role;
-
 
       return {
         code: STATUS_CODE.SUCCESS,
@@ -638,7 +642,7 @@ class AuthService {
       // Remove null values
       return {
         status: STATUS_CODE.SUCCESS,
-        data:user,
+        data: user,
       };
     } catch (error) {
       return {
