@@ -4,6 +4,7 @@ import "./App.css";
 
 import AuthLayout from "./components/auth/authLayout";
 import ProtectedRoute from "./components/auth/protectedRoute";
+import AuthOtpValidation from "./components/auth/verifyOtpUser";
 import LibraryLayout from "./components/Library/libraryLayout";
 import UserLayout from "./components/user/userLayout";
 import { useAppDispatch } from "./hooks/hooks";
@@ -41,7 +42,15 @@ function App() {
       <Routes>
         <Route
           path="/"
+<<<<<<< HEAD
           element={<ProtectedRoute>{<AuthLayout />}</ProtectedRoute>}
+=======
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+>>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
         />
         <Route
           path="/auth"
@@ -53,6 +62,7 @@ function App() {
         >
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
+          <Route path="verify-otp" element={<AuthOtpValidation />} />
         </Route>
 
         <Route

@@ -41,6 +41,7 @@ export const authenticateUser = async (
 export const authorizeUser = (roles: ROLES[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as any).user;
+    console.log("🚀 ~ authorizeUser ~ user:", user)
 
     if (!user) {
       res.status(STATUS_CODE.UNAUTHORIZED).json({ message: "Unauthorized - No user found" });
