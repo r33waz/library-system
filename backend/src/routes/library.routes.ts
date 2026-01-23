@@ -9,7 +9,7 @@ import { validateDto } from "../middleware/RequestValidator";
 const router = express.Router();
 router.get("/:id", libraryController.getOne);
 router.use(authenticateUser);
-router.use(authorizeUser([ROLES.LIBRARY_EMP]));
+router.use(authorizeUser([ROLES.LIBRARY_ADMIN,ROLES.LIBRARY_EMP]));
 router.get("/libraryEmp/:id", libraryController.getOneEmp);
 router.use(authorizeUser([ROLES.SUDO_ADMIN, ROLES.LIBRARY_ADMIN]));
 router.post(

@@ -21,9 +21,9 @@ export const updateLibrary = createAsyncThunk(
     { id, data }: { id: string; data: Partial<ILibraryInterface> },
     { rejectWithValue }
   ) => {
+    console.log("🚀 ~ data:", data)
     try {
       const resp = await main_url.patch(endPoints.updateLibrary(id), data);
-      return resp.data;
     } catch (error: any) {
       return rejectWithValue(error);
     }
