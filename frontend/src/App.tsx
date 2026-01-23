@@ -4,7 +4,6 @@ import "./App.css";
 
 import AuthLayout from "./components/auth/authLayout";
 import ProtectedRoute from "./components/auth/protectedRoute";
-import AuthOtpValidation from "./components/auth/verifyOtpUser";
 import LibraryLayout from "./components/Library/libraryLayout";
 import UserLayout from "./components/user/userLayout";
 import { useAppDispatch } from "./hooks/hooks";
@@ -26,6 +25,7 @@ const SingleBook = lazy(() => import("./pages/user/sinngleBook"));
 const Wishlist = lazy(() => import("./pages/user/wishlist"));
 const SingleLibrary = lazy(() => import("./pages/user/singleLibrary"));
 
+
 // Components
 const Admin = lazy(() => import("./components/admin/admin"));
 const Auth = lazy(() => import("./components/auth/authLayout"));
@@ -40,6 +40,7 @@ function App() {
   return (
     <>
       <Routes>
+<<<<<<< HEAD
         <Route
           path="/"
 <<<<<<< HEAD
@@ -52,6 +53,9 @@ function App() {
           }
 >>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
         />
+=======
+        <Route path="/" element={<ProtectedRoute></ProtectedRoute>} />
+>>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
         <Route
           path="/auth"
           element={
@@ -62,7 +66,6 @@ function App() {
         >
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
-          <Route path="verify-otp" element={<AuthOtpValidation />} />
         </Route>
 
         <Route

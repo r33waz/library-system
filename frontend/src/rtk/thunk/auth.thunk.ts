@@ -39,8 +39,13 @@ export const googleLoginThunk = createAsyncThunk(
       console.log("🚀 ~ idToken:", idToken)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/api/v1/auth/google-login`,
+=======
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}api/v1/auth/google-login`,
+>>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
         {
           method: "POST",
           headers: {
@@ -50,6 +55,7 @@ export const googleLoginThunk = createAsyncThunk(
           credentials: "include",
         }
       );
+<<<<<<< HEAD
 =======
       const response = await main_url.post(endPoints?.googleLogin, { idToken }, {
         headers: {
@@ -57,9 +63,16 @@ export const googleLoginThunk = createAsyncThunk(
         },
       });
 >>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
+=======
+>>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
       console.log("🚀 ~ google signin response :", response)
 
-      return response.data;
+      if (!response.ok) {
+        throw new Error("Google login failed");
+      }
+
+      const data = await response.json();
+      return data;
     } catch (err: any) {
       return rejectWithValue(err.message);
     }
@@ -72,10 +85,13 @@ export const authorizeThunk = createAsyncThunk(
     try {
       const resp = await main_url.get(endPoints?.authorize);
 <<<<<<< HEAD
+<<<<<<< HEAD
       console.log("🚀 ~ authorize thunk resp:", resp)
 =======
       console.log("🚀 ~ resp:", resp)
 >>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
+=======
+>>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
       
       return resp.data;
     } catch (error: any) {
