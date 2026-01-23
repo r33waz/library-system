@@ -6,26 +6,17 @@ import { BLOCK_STATUS, STATUS_CODE } from "../constant/enum";
 import { Auth } from "../entities/auth.enity";
 import { AuthOtp } from "../entities/otp.entity";
 import User from "../entities/user.entity";
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { generateOtp, otpExpiry } from "../helper/genOtp";
-import {
-  genAccessToken,
-  genRefreshToken,
-  verifyToken,
-} from "../helper/genToken";
-=======
 import {
   generateOtp,
   generateSignupToken,
   otpExpiry,
   signupTokenExpiry,
 } from "../helper/genOtp";
-=======
-import { generateOtp, otpExpiry } from "../helper/genOtp";
->>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
-import { genAccessToken, genRefreshToken } from "../helper/genToken";
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
+import {
+  genAccessToken,
+  genRefreshToken,
+  verifyToken,
+} from "../helper/genToken";
 import { comparePassword, hashPassword } from "../helper/passwordHelper";
 import {
   AuthenticatedRequest,
@@ -42,28 +33,22 @@ class AuthService {
 
   async signUpService(req: Request) {
     const { firstname, lastname, middlename, email, password } = req.body;
-<<<<<<< HEAD
-=======
     console.log(
       "🚀 ~ AuthService ~ signUpService ~ firstname, lastname, middlename, email, password :",
       firstname,
       lastname,
       middlename,
       email,
-      password
+      password,
     );
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
 
     try {
       // Check for existing user
       const existingUser = await this.authRepository.findOneBy({ email });
-<<<<<<< HEAD
-=======
       console.log(
         "🚀 ~ AuthService ~ signUpService ~ existingUser:",
-        existingUser
+        existingUser,
       );
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
 
 
       if (existingUser) {
@@ -74,7 +59,7 @@ class AuthService {
         };
       }
 
-      if (email.includes('+')) {
+      if (email.includes("+")) {
         return {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
@@ -83,13 +68,10 @@ class AuthService {
       }
 
       const hashedPassword = await hashPassword(password);
-<<<<<<< HEAD
-=======
       console.log(
         "🚀 ~ AuthService ~ signUpService ~ hashedPassword:",
-        hashedPassword
+        hashedPassword,
       );
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
 
       // STEP 1 — Perform DB writes inside a transaction
       const { user, auth } = await AppDataSource.transaction(
@@ -109,12 +91,25 @@ class AuthService {
           await transaction.save(auth);
 
           return { user, auth };
-        }
+        },
       );
 
       // genereate opt
       const otp = generateOtp();
       const hashedOtp = await hashPassword(otp);
+
+      const signUpToken = generateSignupToken();
+
+      const hashedSignUpToken = await hashPassword(signUpToken);
+
+      // Save OTP to DB
+
+      const auth_db = await this.authRepository.findOneBy({ email });
+
+      await this.authRepository.update(auth_db?.id as string, {
+        signupToken: hashedSignUpToken,
+        signupTokenExpiresAt: signupTokenExpiry(),
+      });
 
       const authOtp = this.otpRepository.create({
         otp: hashedOtp,
@@ -520,16 +515,9 @@ class AuthService {
 
   async verifyOtp(req: Request) {
     try {
-<<<<<<< HEAD
-<<<<<<< HEAD
-      const { otp, email } = req.body;
-=======
       const { otp, email, signupToken } = req.body;
-=======
-      const { otp, email } = req.body;
->>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
+
       console.log("🚀 ~ AuthService ~ verifyOtp ~ otp, email:", otp, email);
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
 
       if (!email) {
         return {
@@ -544,6 +532,35 @@ class AuthService {
         .where("auth.email = :email", { email })
         .leftJoinAndSelect("auth.user", "user")
         .getOne();
+
+      if (!existingUser?.signupToken || !existingUser?.signupTokenExpiresAt) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "No signup token found. Please request a new one.",
+        };
+      }
+
+      if (existingUser.signupTokenExpiresAt < new Date()) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Signup token has expired. Please request a new one.",
+        };
+      }
+
+      const isSignupTokenValid = await comparePassword(
+        signupToken,
+        existingUser.signupToken,
+      );
+
+      if (!isSignupTokenValid) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Invalid signup token.",
+        };
+      }
 
       if (
         existingUser?.blocked === BLOCK_STATUS.ACTIVE &&
@@ -619,19 +636,10 @@ class AuthService {
       const { id } = req?.user;
       const user = await this.authRepository
         .createQueryBuilder("auth")
-<<<<<<< HEAD
         .leftJoinAndSelect("auth.user", "user")
-<<<<<<< HEAD
-        .leftJoinAndSelect("auth.admin", "admin")
-        .leftJoinAndSelect("auth.library", "library")
-        .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
-=======
         .leftJoinAndSelect("auth.library", "library")
         .leftJoinAndSelect("auth.libraryEmp", "libraryEmp")
         .leftJoinAndSelect("auth.admin", "admin")
->>>>>>> 0cec90a (making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp)
-=======
->>>>>>> 869216d (Revert "making more secure for the otp validation while user signup and change the entity of the auth and created the more funtion to generate the signup otp and will make the input box or dialog to verify the otp")
         .where("auth.id = :id", { id })
         .getOne();
       console.log("🚀 ~ AuthService ~ authorizeUser ~ user:", user);

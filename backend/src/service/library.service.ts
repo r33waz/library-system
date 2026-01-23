@@ -237,6 +237,7 @@ class LibraryService {
   async update(req: Request) {
     try {
       const { id } = req.params;
+      console.log("🚀 ~ LibraryService ~ update ~ id:", id)
       const {
         name,
         description,
