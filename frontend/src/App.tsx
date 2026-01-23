@@ -2,6 +2,7 @@ import { lazy, useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 
+import AuthLayout from "./components/auth/authLayout";
 import ProtectedRoute from "./components/auth/protectedRoute";
 import LibraryLayout from "./components/Library/libraryLayout";
 import UserLayout from "./components/user/userLayout";
@@ -24,10 +25,9 @@ const SingleBook = lazy(() => import("./pages/user/sinngleBook"));
 const Wishlist = lazy(() => import("./pages/user/wishlist"));
 const SingleLibrary = lazy(() => import("./pages/user/singleLibrary"));
 
-
 // Components
 const Admin = lazy(() => import("./components/admin/admin"));
-const Auth = lazy(() => import("./components/auth/auth"));
+const Auth = lazy(() => import("./components/auth/authLayout"));
 
 function App() {
   const dispatch = useAppDispatch();
@@ -39,12 +39,15 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ProtectedRoute></ProtectedRoute>} />
+        <Route
+          path="/"
+          element={<ProtectedRoute>{<AuthLayout />}</ProtectedRoute>}
+        />
         <Route
           path="/auth"
           element={
             <ProtectedRoute>
-              <Auth />
+              <AuthLayout />
             </ProtectedRoute>
           }
         >
