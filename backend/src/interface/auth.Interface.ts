@@ -39,6 +39,14 @@ export interface OtpEmailParams {
   email: string;
   firstname: string;
   lastname: string;
-  otp?: string;
+  otp: string;
+  expiryMinutes?: number;
+  libraryEmail?: string;
+}
+
+
+export interface RestPasswordEmailParams {
+  email: string;
+  otp: string;
   expiryMinutes?: number;
 }

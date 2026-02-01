@@ -25,6 +25,9 @@ export interface IAuthInitialState {
   isUserLoading: boolean;
   isUserError: boolean;
   userDeatails: IUserDetails | null;
+
+  // googleLogin related fields can be added here if needed
+  googleLoading: boolean;
 }
 
 export interface IUserDetails {

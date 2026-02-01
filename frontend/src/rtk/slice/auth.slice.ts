@@ -18,10 +18,13 @@ const initialState: IAuthInitialState = {
   user: {
     role: "",
   },
- initialized: false,
+  initialized: false,
   isUserLoading: false,
   isUserError: false,
   userDeatails: null,
+
+  // google login related fields
+  googleLoading: false,
 };
 
 const authSlice = createSlice({
@@ -58,11 +61,11 @@ const authSlice = createSlice({
 
     // google signin
     builder.addCase(googleLoginThunk.pending, (state) => {
-      state.isLoading = true;
+      state.googleLoading = true;
     });
 
     builder.addCase(googleLoginThunk.fulfilled, (state, action) => {
-      state.isLoading = false;
+      state.googleLoading = false;
       state.user.role = action?.payload?.data ? action?.payload?.data : null;
       state.isAuthenticated = true;
     });
@@ -74,7 +77,7 @@ const authSlice = createSlice({
     });
 
     // Handle authorization (getting user info)
-builder.addCase(authorizeThunk.pending, (state) => {
+    builder.addCase(authorizeThunk.pending, (state) => {
       state.isLoading = true;
       state.isAuthChecked = false; // Set to false when starting the check
     });

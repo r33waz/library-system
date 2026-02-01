@@ -1,3 +1,4 @@
+
 export const generateOtp = (): string => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6 digits
 };
@@ -16,3 +17,4 @@ export const generateSignupToken = (): string => {
 export const signupTokenExpiry = () => {
   return new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 };
+

@@ -89,6 +89,7 @@ const messages = {
       deleted: "Notification deleted successfully.",
     },
     emailVerificationDone: "Email verification is  completed.",
+    otpSendSuccess: "Otp sent sucessfully",
   },
   errorMessages: {
     book: {
@@ -102,6 +103,7 @@ const messages = {
     phoneNumberExist:
       "Phone number already exists. Please choose a different phone number.",
     passwordIncorrect: "Incorrect password. Please try again.",
+    enterPassword: "Please provide your password",
     universityIdExist:
       "University ID already exists. Please choose a different ID.",
     emailNotFound: "Email not found. Please check your email address.",
@@ -132,6 +134,16 @@ const messages = {
     dependencyError: "Operation failed due to dependent records.",
     invalidCsrfToken: "Invalid CSRF token.",
     invalidTokens: "Invalid tokens provided.",
+
+    otpRequired: "OTP is required. Please enter the verification code.",
+    otpInvalid: "Invalid OTP. Please check the code and try again.",
+    otpExpired: "OTP has expired. Please request a new one.",
+    otpAlreadyUsed: "This OTP has already been used.",
+    otpMismatch: "OTP does not match. Please try again.",
+    otpNotFound: "OTP not found. Please request a new one.",
+    otpVerificationFailed: "OTP verification failed. Please try again.",
+    otpAttemptsExceeded:
+      "Too many incorrect OTP attempts. Please request a new OTP.",
   },
 };
 

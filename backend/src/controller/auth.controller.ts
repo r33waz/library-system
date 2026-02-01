@@ -45,11 +45,27 @@ class AuthController {
     });
   }
 
+  // reset password
+
+  async restPassword(req: Request, res: Response): Promise<void> {
+    const result = await authService.resetPasseord(req);
+    sendResponse(res, {
+      status: result?.status,
+      message: result?.messages,
+      httpCode: result?.code,
+    });
+  }
+
   // Forgot Password handler
-  // forgotPassword: async (req: Request, res: Response): Promise<void> => {
-  //   const { email } = req.body;
-  //   res.send(`Forgot Password logic here for email: ${email}`);
-  // },
+  async forgotPassword(req: Request, res: Response): Promise<void> {
+    const result = await authService.forgetPassword(req);
+
+    sendResponse(res, {
+      status: result?.status,
+      message: result?.messages,
+      httpCode: result?.code,
+    });
+  }
 
   // Reset Password handler
   // resetPassword: async (req: Request, res: Response): Promise<void> => {
@@ -88,7 +104,7 @@ class AuthController {
   async authorizedUser(req: Request, res: Response): Promise<void> {
     const result = await authService.authorizeUser(
       req as AuthenticatedRequest,
-      res
+      res,
     );
     sendResponse(res, {
       status: result?.status,

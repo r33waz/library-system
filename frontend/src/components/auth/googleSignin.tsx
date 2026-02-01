@@ -5,7 +5,7 @@ import { Button } from "../ui/button";
 
 const GoogleSignInButton = ({ mode }: { mode: "login" | "signup" }) => {
   const dispatch = useAppDispatch();
-  const { isLoading } = useAppSelector((state) => state.auth);
+  const { googleLoading } = useAppSelector((state) => state.auth);
 
   const handleGoogleSignIn = () => {
     dispatch(googleLoginThunk());
@@ -23,12 +23,12 @@ const GoogleSignInButton = ({ mode }: { mode: "login" | "signup" }) => {
         className="w-5 h-5"
       />
       {mode === "login" ? (
-        isLoading ? (
+        googleLoading ? (
           <span>Singing in...</span>
         ) : (
           <span>Sign in with Google</span>
         )
-      ) : isLoading ? (
+      ) : googleLoading ? (
         <span>Singing up...</span>
       ) : (
         <span>Sign up with Google</span>

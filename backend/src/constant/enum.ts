@@ -64,3 +64,11 @@ export const BookGenres = {
   SCIFI: "SCIFI",
   BIOGRAPHY: "BIOGRAPHY",
 };
+
+export enum OTP_TYPE {
+  EMAIL_VERIFICATION = "EMAIL_VERIFICATION",
+  PASSWORD_RESET = "PASSWORD_RESET",
+  SIGN_UP = "SIGN_UP",
+}
+
+

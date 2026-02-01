@@ -4,7 +4,6 @@ import "./App.css";
 
 import AuthLayout from "./components/auth/authLayout";
 import ProtectedRoute from "./components/auth/protectedRoute";
-import AuthOtpValidation from "./components/auth/verifyOtpUser";
 import LibraryLayout from "./components/Library/libraryLayout";
 import UserLayout from "./components/user/userLayout";
 import { useAppDispatch } from "./hooks/hooks";
@@ -48,7 +47,7 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/" element={<ProtectedRoute></ProtectedRoute>} />
+        <Route path="/" element={<ProtectedRoute><Auth/></ProtectedRoute>} />
         <Route
           path="/auth"
           element={
@@ -59,7 +58,7 @@ function App() {
         >
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
-          <Route path="verify-otp" element={<AuthOtpValidation />} />
+          {/* <Route path="verify-otp" element={<AuthOtpValidation />} /> */}
         </Route>
 
         <Route

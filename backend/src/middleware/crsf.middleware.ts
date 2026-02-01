@@ -3,21 +3,19 @@ import "dotenv/config";
 import { NextFunction, Request, Response } from "express";
 import messages from "../utils/message";
 
-
 // Creates a token by hashing the complex secret with a salt and additional layers
 export function createToken(secret: string): string {
-  console.log("🚀 ~ createToken ~ secret:", secret)
+  console.log("🚀 ~ createToken ~ secret:", secret);
   return crypto
     .createHmac("sha256", process.env.CSRF_TOKEN as string)
     .update(secret)
     .digest("hex");
 }
 
-
 export function verifyCsrf(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   const secret = req.cookies.csrfSecret;
   const token = req.headers["x-csrf-token"];
@@ -41,7 +39,7 @@ const protectedMethods = ["POST", "PUT", "PATCH", "DELETE"];
 export function csrfProtection(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   //  Skip CSRF protection for login and registration
   if (
@@ -49,6 +47,7 @@ export function csrfProtection(
     req.path === "/api/v1/auth/signup" ||
     req.path === "/api/v1/auth/verifyOtp" ||
     req.path === "/api/v1/auth/logout" ||
+    req.path === "/api/v1/auth/reset-password" ||
     req.path === "/api/v1/auth/google-login"
   ) {
     return next();

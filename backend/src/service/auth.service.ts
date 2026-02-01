@@ -2,16 +2,11 @@ import "dotenv/config";
 import { Request, Response } from "express";
 import AppDataSource from "../config/db.config";
 import firebaseAdmin from "../config/firebaseConfig";
-import { BLOCK_STATUS, STATUS_CODE } from "../constant/enum";
+import { BLOCK_STATUS, OTP_TYPE, STATUS_CODE } from "../constant/enum";
 import { Auth } from "../entities/auth.enity";
 import { AuthOtp } from "../entities/otp.entity";
 import User from "../entities/user.entity";
-import {
-  generateOtp,
-  generateSignupToken,
-  otpExpiry,
-  signupTokenExpiry,
-} from "../helper/genOtp";
+import { generateOtp, otpExpiry } from "../helper/genOtp";
 import {
   genAccessToken,
   genRefreshToken,
@@ -22,6 +17,7 @@ import {
   AuthenticatedRequest,
   ILogin,
   OtpEmailParams,
+  RestPasswordEmailParams,
 } from "../interface/auth.Interface";
 import { createToken } from "../middleware/crsf.middleware";
 import messages from "../utils/message";
@@ -49,7 +45,6 @@ class AuthService {
         "🚀 ~ AuthService ~ signUpService ~ existingUser:",
         existingUser,
       );
-
 
       if (existingUser) {
         return {
@@ -98,23 +93,11 @@ class AuthService {
       const otp = generateOtp();
       const hashedOtp = await hashPassword(otp);
 
-      const signUpToken = generateSignupToken();
-
-      const hashedSignUpToken = await hashPassword(signUpToken);
-
-      // Save OTP to DB
-
-      const auth_db = await this.authRepository.findOneBy({ email });
-
-      await this.authRepository.update(auth_db?.id as string, {
-        signupToken: hashedSignUpToken,
-        signupTokenExpiresAt: signupTokenExpiry(),
-      });
-
       const authOtp = this.otpRepository.create({
         otp: hashedOtp,
         auth: auth,
         expireAt: otpExpiry(),
+        otp_type: OTP_TYPE.SIGN_UP,
       });
 
       await this.otpRepository.save(authOtp);
@@ -442,7 +425,7 @@ class AuthService {
       // Verify refresh token
       const decoded = await verifyToken(
         refreshToken,
-        process.env.REFRESH_TOKEN
+        process.env.REFRESH_TOKEN,
       );
       if (!decoded) {
         return {
@@ -515,7 +498,7 @@ class AuthService {
 
   async verifyOtp(req: Request) {
     try {
-      const { otp, email, signupToken } = req.body;
+      const { otp, email, signupToken, otp_type } = req.body;
 
       console.log("🚀 ~ AuthService ~ verifyOtp ~ otp, email:", otp, email);
 
@@ -532,35 +515,6 @@ class AuthService {
         .where("auth.email = :email", { email })
         .leftJoinAndSelect("auth.user", "user")
         .getOne();
-
-      if (!existingUser?.signupToken || !existingUser?.signupTokenExpiresAt) {
-        return {
-          code: STATUS_CODE.BAD_REQUEST,
-          status: false,
-          message: "No signup token found. Please request a new one.",
-        };
-      }
-
-      if (existingUser.signupTokenExpiresAt < new Date()) {
-        return {
-          code: STATUS_CODE.BAD_REQUEST,
-          status: false,
-          message: "Signup token has expired. Please request a new one.",
-        };
-      }
-
-      const isSignupTokenValid = await comparePassword(
-        signupToken,
-        existingUser.signupToken,
-      );
-
-      if (!isSignupTokenValid) {
-        return {
-          code: STATUS_CODE.BAD_REQUEST,
-          status: false,
-          message: "Invalid signup token.",
-        };
-      }
 
       if (
         existingUser?.blocked === BLOCK_STATUS.ACTIVE &&
@@ -598,6 +552,15 @@ class AuthService {
           code: STATUS_CODE.BAD_REQUEST,
           status: false,
           message: "OTP not found. Please request a new one.",
+        };
+      }
+
+      // Validate OTP type
+      if (otp_type && otpRecord.otp_type !== otp_type) {
+        return {
+          code: STATUS_CODE.BAD_REQUEST,
+          status: false,
+          message: "Invalid OTP type.",
         };
       }
 
@@ -737,6 +700,111 @@ class AuthService {
     };
   }
 
+  async resetPasseord(req: Request) {
+    const { email } = req.body;
+    try {
+      const user = await this.authRepository.findOneBy({ email });
+
+      if (!user) {
+        return {
+          status: false,
+          messages: messages.errorMessages.noUserFound,
+          code: STATUS_CODE.BAD_REQUEST,
+        };
+      }
+
+      const otp = generateOtp();
+      const hashedOtp = await hashPassword(otp);
+
+      const authOtp = this.otpRepository.create({
+        otp: hashedOtp,
+        auth: user,
+        expireAt: otpExpiry(),
+        otp_type: OTP_TYPE.SIGN_UP,
+      });
+
+      await this.otpRepository.save(authOtp);
+
+      const recipientEmails = [email];
+      const emailHTML = generateResetPasswordOtpEmailHTML({
+        email: email,
+        otp: otp,
+      });
+      const emailText = "Verify your account with the otp";
+
+      await sendMail(recipientEmails, emailText, emailHTML);
+
+      return {
+        code: STATUS_CODE.SUCCESS,
+        status: true,
+        message: messages.successMessages.emailVerificationDone,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        messages: messages.errorMessages.serverError,
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
+  // forget password
+  async forgetPassword(req: Request) {
+    const { email, newpassword, otp, otp_type } = req.body;
+    try {
+      const user = await this.authRepository.findOneBy({ email });
+      if (!user) {
+        return {
+          status: false,
+          messages: messages?.errorMessages?.noUserFound,
+          code: STATUS_CODE.BAD_REQUEST,
+        };
+      }
+
+      if (!newpassword) {
+        return {
+          status: false,
+          messages: messages.errorMessages.passwordIncorrect,
+          code: STATUS_CODE.BAD_REQUEST,
+        };
+      }
+
+      if (!user?.password) {
+        return {
+          status: false,
+          messages: messages?.errorMessages?.passwordIncorrect,
+          code: STATUS_CODE.BAD_REQUEST,
+        };
+      }
+
+      const isSamePassword = await comparePassword(newpassword, user?.password);
+
+      if (isSamePassword) {
+        return {
+          status: false,
+          messages: messages?.errorMessages?.passwordIncorrect,
+          code: STATUS_CODE.BAD_REQUEST,
+        };
+      }
+
+      const hashedPassword = await hashPassword(newpassword);
+
+      await this.authRepository.update({ email }, { password: hashedPassword });
+
+      return {
+        status: false,
+        messages: messages?.successMessages?.password?.changeSuccess,
+        code: STATUS_CODE.SUCCESS,
+      };
+    } catch (error) {
+      return {
+        status: false,
+        messages: messages.errorMessages.serverError,
+        code: STATUS_CODE.INTERNAL_SERVER_ERROR,
+      };
+    }
+  }
+
   async logoutService(response: Response) {
     response.clearCookie("accessToken");
     response.clearCookie("refreshToken");
@@ -803,6 +871,81 @@ export const generateOtpEmailHTML = ({
 
       <p style="font-size:14px; color:#777; margin-top:25px;">
         If you did not request this, please ignore this email.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background:#f9f9f9; padding:15px; text-align:center; font-size:13px; color:#666;">
+      <p style="margin:0;">© 2025 Your Company. All rights reserved.</p>
+    </div>
+
+  </div>
+</body>
+</html>
+`;
+};
+
+export const generateResetPasswordOtpEmailHTML = ({
+  email,
+  otp,
+  expiryMinutes = 5,
+}: RestPasswordEmailParams) => {
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset Your Password</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f4f4f4; font-family:Arial, sans-serif; color:#333;">
+  <div style="max-width:600px; margin:30px auto; background:#ffffff; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+
+    <!-- Header -->
+    <div style="background-color:#D32F2F; padding:20px; text-align:center; color:#ffffff;">
+      <h1 style="margin:0; font-size:22px;">Reset Your Password</h1>
+    </div>
+
+    <!-- Content -->
+    <div style="padding:25px; text-align:center;">
+      <p style="font-size:16px; margin-bottom:10px;">
+        Hello,
+      </p>
+
+      <p style="font-size:15px; line-height:1.6;">
+        We received a request to reset the password for the account associated with:
+      </p>
+
+      <p style="font-size:15px; font-weight:bold;">
+        ${email}
+      </p>
+
+      <p style="font-size:15px; line-height:1.6;">
+        Use the one-time password (OTP) below to reset your password.
+      </p>
+
+      <div style="margin:30px 0;">
+        <span style="
+          display:inline-block;
+          font-size:32px;
+          letter-spacing:6px;
+          font-weight:bold;
+          background:#f0f0f0;
+          padding:15px 25px;
+          border-radius:6px;
+          color:#333;
+        ">
+          ${otp}
+        </span>
+      </div>
+
+      <p style="font-size:14px; color:#555;">
+        This OTP will expire in <strong>${expiryMinutes} minutes</strong>.
+      </p>
+
+      <p style="font-size:14px; color:#777; margin-top:25px;">
+        If you did not request a password reset, please ignore this email.
+        No changes will be made to your account.
       </p>
     </div>
 

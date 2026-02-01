@@ -63,17 +63,6 @@ export const authorizeThunk = createAsyncThunk(
   }
 );
 
-export const checkAuthThunk = createAsyncThunk(
-  "auth/checkAuth",
-  async (payload: LoginInterface, { rejectWithValue }) => {
-    try {
-      const resp = await main_url.post(endPoints?.me, payload);
-      return resp.data;
-    } catch (error: any) {
-      return rejectWithValue(error);
-    }
-  }
-);
 
 export const me = createAsyncThunk(
   "auth/me",

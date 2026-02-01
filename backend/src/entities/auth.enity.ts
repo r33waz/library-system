@@ -65,11 +65,6 @@ export class Auth extends BaseEntity {
     cascade: true,
     onDelete: "CASCADE",
   })
-  @Column({ type: "varchar", length: 255, nullable: true })
-  signupToken: string | null;
-
-  @Column({ type: "timestamptz", nullable: true })
-  signupTokenExpiresAt: Date | null;
 
   @OneToOne(() => Library, { nullable: true, cascade: true })
   @JoinColumn({ name: "libraryId" })
