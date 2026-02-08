@@ -1,7 +1,7 @@
 import GoogleSignInButton from "@/components/auth/googleSignin";
 import AuthOtpValidation from "@/components/auth/verifyOtpUser";
+import GenericInput from "@/components/common/GenericInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { LoginInterface } from "@/interface/auth.interface";
@@ -13,8 +13,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 const LoginPage = () => {
-  const [otp, setOtp] = useState<string[]>(Array(6).fill("")); // IGNORE  
-  console.log("🚀 ~ LoginPage ~ otp:", otp)
+  const [otp, setOtp] = useState<string[]>(Array(6).fill("")); // IGNORE
   const dispatch = useAppDispatch();
   const { isLoading } = useAppSelector((state) => state.auth);
   const {
@@ -56,30 +55,25 @@ const LoginPage = () => {
                 </p>
               </div>
               <div className="flex flex-col gap-5">
-                <div className="flex flex-col gap-2">
-                  <Label className="">Email</Label>
-                  <Input
+                <div className="flex flex-col gap-4">
+                  <GenericInput<LoginInterface>
+                    label="Email"
+                    name="email"
+                    type="email"
+                    register={register}
+                    errors={errors}
+                    isRequired
                     placeholder="Enter your email"
-                    id="email"
-                    {...register("email")}
-                    className={`border ${errors?.email ? "border-error-red" : "border-gray-3"}   h-10 text-xs`}
                   />
-                  <small className="text-xs text-error-red tracking-wider">
-                    {errors?.email?.message}
-                  </small>
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label className="">Password</Label>
-                  <Input
-                    type="text"
-                    placeholder="Enter your passoword"
-                    id="password"
-                    {...register("password")}
-                    className={`border ${errors?.password ? "border-error-red" : "border-gray-3"}   h-10 text-xs`}
+                  <GenericInput<LoginInterface>
+                    label="Password"
+                    name="password"
+                    type="password"
+                    register={register}
+                    errors={errors}
+                    isRequired
+                    placeholder="Enter your password"
                   />
-                  <small className="text-xs text-error-red tracking-wider">
-                    {errors?.password?.message}
-                  </small>
                 </div>
               </div>
               <Button
@@ -187,7 +181,7 @@ const LoginPage = () => {
           </form>
         </div>
       </div>
-      <AuthOtpValidation setOtp={setOtp} otp={otp}/>
+      <AuthOtpValidation setOtp={setOtp} otp={otp} />
     </>
   );
 };
