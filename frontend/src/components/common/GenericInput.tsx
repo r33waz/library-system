@@ -1,56 +1,55 @@
 import { Label } from "@radix-ui/react-dropdown-menu";
-import {
-    FieldErrors,
-    FieldValues,
-    Path,
-    RegisterOptions,
-    UseFormRegister,
-} from "react-hook-form";
+import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { Input } from "../ui/input";
 
-interface IProps<T extends FieldValues> {
+interface IInputProps<T extends FieldValues> {
   label: string;
   type?: string;
   name: Path<T>;
-  register: UseFormRegister<T>;
-  errors?: FieldErrors<T>;
-  rules?: RegisterOptions<T>;
+  control: Control<T>;
   isDisable?: boolean;
   isRequired?: boolean;
   placeholder?: string;
 }
+
 function GenericInput<T extends FieldValues>({
   label,
-  type,
+  type = "text",
   name,
-  errors,
-  register,
-  isDisable,
-  rules,
+  control,
+  isDisable = false,
   isRequired,
   placeholder,
-}: IProps<T>) {
-  const errorMessage = errors?.[name]?.message as string | undefined;
+}: IInputProps<T>) {
   return (
     <div className="space-y-1">
-      <Label className="text-sm font-normal">
+      <Label className="text-sm">
         {label}
         {isRequired && <span className="text-red-500 ml-1">*</span>}
       </Label>
 
-      <Input
-        id={name}
-        type={type}
-        disabled={isDisable}
-        aria-invalid={!!errorMessage}
-        placeholder={placeholder}
-        {...register(name, {
-          required: isRequired ? `${label} is required` : false,
-          ...rules,
-        })}
-      />
+      <Controller
+        name={name}
+        control={control}
+        render={({ field, fieldState }) => (
+          <>
+            <Input
+              id={name}
+              {...field}
+              type={type}
+              disabled={isDisable}
+              placeholder={placeholder}
+              className={`${fieldState.error ? "border-red-400" : ""}`}
+            />
 
-      {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
+            {fieldState.error && (
+              <p className="text-red-500 text-xs font-light mt-1">
+                {fieldState.error.message}
+              </p>
+            )}
+          </>
+        )}
+      />
     </div>
   );
 }

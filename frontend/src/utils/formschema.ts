@@ -9,7 +9,16 @@ export const registerSchema = yup.object().shape({
   firstname: yup.string().required("First name is required"),
   lastname: yup.string().required("Last name is required"),
   phonenumber: yup.string().required("Phone number is required"),
-  password: yup.string().required("Password is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(
+      /[^A-Za-z0-9]/,
+      "Password must contain at least one special character",
+    ),
   confirmPassword: yup
     .string()
     .required("Confirm password is required")

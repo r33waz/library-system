@@ -1,7 +1,6 @@
 import GoogleSignInButton from "@/components/auth/googleSignin";
+import GenericInput from "@/components/common/GenericInput";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { RegisterInterface } from "@/interface/auth.interface";
 import { registerThunk } from "@/rtk/thunk/auth.thunk";
@@ -21,6 +20,7 @@ const RegisterPage = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<RegisterInterface>({
     resolver: yupResolver(registerSchema),
@@ -68,89 +68,58 @@ const RegisterPage = () => {
 
             <div className="space-y-3 sm:space-y-4">
               <div className="flex flex-col gap-1">
-                <Label htmlFor="email" className="">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  type="email"
+                <GenericInput<RegisterInterface>
+                  label="Email"
+                  name="email"
+                  type="text"
+                  control={control}
+                  isRequired
                   placeholder="Enter your email"
-                  {...register("email")}
-                  className={`border ${
-                    errors?.email ? "border-error-red" : "border-gray-3"
-                  }   h-10 text-xs`}
                 />
-                <small className="text-xs text-error-red tracking-wider">
-                  {errors?.email && errors.email.message}
-                </small>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3   ">
                 <div className="flex flex-col gap-1">
-                  <Label htmlFor="name" className="">
-                    Full Name
-                  </Label>
-                  <Input
-                    id="firstname"
+                  <GenericInput<RegisterInterface>
+                    label="First Name"
+                    name="firstname"
                     type="text"
-                    placeholder="Enter your full name"
-                    className={`border ${
-                      errors?.firstname ? "border-error-red" : "border-gray-3"
-                    }   h-10 text-xs`}
-                    {...register("firstname")}
+                    control={control}
+                    isRequired
+                    placeholder="Enter your first name"
                   />
-                  <small className="text-xs text-error-red tracking-wider">
-                    {errors?.firstname && errors.firstname.message}
-                  </small>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label htmlFor="name" className="">
-                    Last Name
-                  </Label>
-                  <Input
-                    id="lastname"
+                  <GenericInput<RegisterInterface>
+                    label="Last Name"
+                    name="lastname"
                     type="text"
-                    placeholder="Enter your full name"
-                    className={`border ${
-                      errors?.lastname ? "border-error-red" : "border-gray-3"
-                    }   h-10 text-xs`}
-                    {...register("lastname")}
+                    control={control}
+                    isRequired
+                    placeholder="Enter your last nmame"
                   />
-                  <small className="text-xs text-error-red tracking-wider">
-                    {errors?.lastname && errors.lastname.message}
-                  </small>
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <Label htmlFor="name" className="">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phonenumber"
+                <GenericInput<RegisterInterface>
+                  label="Phone Number"
+                  name="phonenumber"
                   type="text"
+                  control={control}
+                  isRequired
                   placeholder="Enter your phone number"
-                  className={`border ${
-                    errors?.phonenumber ? "border-error-red" : "border-gray-3"
-                  }   h-10 text-xs`}
-                  {...register("phonenumber")}
                 />
-                <small className="text-xs text-error-red tracking-wider">
-                  {errors?.phonenumber && errors.phonenumber.message}
-                </small>
               </div>
               <div className="flex flex-col gap-1 relative">
-                <Label htmlFor="password" className="">
-                  Password
-                </Label>
-                <Input
-                  id="password"
+                <GenericInput<RegisterInterface>
+                  label="Password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
+                  control={control}
+                  isRequired
                   placeholder="Enter your password"
-                  className={`border ${
-                    errors?.password ? "border-error-red" : "border-gray-3"
-                  }   h-10 text-xs`}
-                  {...register("password")}
                 />
-                <div className="absolute right-3 top-9 transform -translate-y-1/2">
+
+                <div className="absolute right-3 top-10 transform -translate-y-1/2">
                   {showPassword ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -190,27 +159,19 @@ const RegisterPage = () => {
                     </svg>
                   )}
                 </div>
-                <small className="text-xs text-error-red tracking-wider">
-                  {errors?.password && errors.password.message}
-                </small>
               </div>
 
               <div className="flex flex-col gap-1 relative">
-                <Label htmlFor="confirm-password" className="">
-                  Confirm Password
-                </Label>
-                <Input
-                  id="confirm-password"
+                <GenericInput<RegisterInterface>
+                  label="Confirm Password"
+                  name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
-                  className={`border ${
-                    errors?.confirmPassword
-                      ? "border-error-red"
-                      : "border-gray-3"
-                  }   h-10 text-xs`}
-                  {...register("confirmPassword")}
+                  control={control}
+                  isRequired
+                  placeholder="Enter your confirm password"
                 />
-                <div className="absolute right-3 top-9 transform -translate-y-1/2">
+
+                <div className="absolute right-3 top-10 transform -translate-y-1/2">
                   {showConfirmPassword ? (
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -254,9 +215,6 @@ const RegisterPage = () => {
                     </svg>
                   )}
                 </div>
-                <small className="text-xs text-error-red tracking-wider">
-                  {errors?.confirmPassword && errors.confirmPassword.message}
-                </small>
               </div>
             </div>
 

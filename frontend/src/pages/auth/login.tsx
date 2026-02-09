@@ -2,7 +2,6 @@ import GoogleSignInButton from "@/components/auth/googleSignin";
 import AuthOtpValidation from "@/components/auth/verifyOtpUser";
 import GenericInput from "@/components/common/GenericInput";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import { LoginInterface } from "@/interface/auth.interface";
 import { loginThunk } from "@/rtk/thunk/auth.thunk";
@@ -19,6 +18,7 @@ const LoginPage = () => {
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm<LoginInterface>({
     resolver: yupResolver(loginSchema),
@@ -60,8 +60,7 @@ const LoginPage = () => {
                     label="Email"
                     name="email"
                     type="email"
-                    register={register}
-                    errors={errors}
+                    control={control}
                     isRequired
                     placeholder="Enter your email"
                   />
@@ -69,8 +68,7 @@ const LoginPage = () => {
                     label="Password"
                     name="password"
                     type="password"
-                    register={register}
-                    errors={errors}
+                    control={control}
                     isRequired
                     placeholder="Enter your password"
                   />
